@@ -6,20 +6,33 @@
 #include "GameFramework/Actor.h"
 #include "SExplosiveBarrel.generated.h"
 
+class UStaticMeshComponent;
+class URadialForceComponent;
+
 UCLASS()
 class ACTIONROGUELIKE_API ASExplosiveBarrel : public AActor {
   GENERATED_BODY()
 
 public:
-  // Sets default values for this actor's properties
   ASExplosiveBarrel();
 
 protected:
-  // Called when the game starts or when spawned
-  virtual void BeginPlay() override;
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* MeshComp;
 
-public:
-  // Called every frame
-  virtual void Tick(float DeltaTime) override;
+  UPROPERTY(VisibleAnywhere)
+  URadialForceComponent* ForceComp;
+
+  virtual void BeginPlay() override;
+  virtual void PostInitializeComponents() override;
+
+  UFUNCTION()
+  void OnActorHit(
+    UPrimitiveComponent* HitComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    FVector NormalImpulse,
+    const FHitResult& Hit
+  );
 
 };

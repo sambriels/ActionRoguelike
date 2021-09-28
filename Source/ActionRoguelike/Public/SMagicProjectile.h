@@ -17,13 +17,13 @@ public:
   ASMagicProjectile();
 
 protected:
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   USphereComponent* SphereComponent;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   UProjectileMovementComponent* MovementComponent;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   UParticleSystemComponent* EffectComponent;
 
   // Called when the game starts or when spawned
