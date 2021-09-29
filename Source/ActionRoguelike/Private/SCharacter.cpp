@@ -59,8 +59,29 @@ void ASCharacter::PrimaryAttack() {
 
 void ASCharacter::PrimaryAttack_TimeElapsed() {
   FVector RightHandLocation = GetMesh()->GetSocketLocation("Muzzle_01");;
+  FVector CameraLocation = CameraComponent->GetComponentLocation();
 
-  FTransform SpawnTM = FTransform(GetControlRotation(), RightHandLocation);
+  /**
+   * Since the location of the RightHand is different depending on the rotation of the character
+   * (and the camera might be offset as well), we need to calculate the impact point of the attack
+   * based on the camera location  and it's forward vector instead. This way it is much more intuitive
+   * for the player to gage what he will hit
+   */
+  FHitResult Hit;
+  FCollisionObjectQueryParams Params;
+  Params.AddObjectTypesToQuery(ECC_WorldDynamic);
+  Params.AddObjectTypesToQuery(ECC_WorldStatic);
+  FVector TraceEnd = CameraLocation + CameraComponent->GetForwardVector() * 100000.f;
+  bool bBLockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, CameraLocation, TraceEnd, Params);
+  FVector HitLocation = bBLockingHit ? Hit.Location : TraceEnd;
+
+  /** Calculates the rotation needed to arrive at the impact point from the trace */
+  FRotator FinalRotation = FRotationMatrix::MakeFromX(HitLocation - RightHandLocation).Rotator();
+  /**
+   * This transformation matrix determines the final impact point, based on the start location
+   * and the provided rotation
+   */
+  FTransform SpawnTM = FTransform(FinalRotation, RightHandLocation);
   FActorSpawnParameters SpawnParams;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
   SpawnParams.Instigator = this;
