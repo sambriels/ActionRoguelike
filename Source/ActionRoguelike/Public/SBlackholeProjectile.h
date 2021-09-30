@@ -3,14 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SphereComponent.h"
-#include "GameFramework/Actor.h"
-#include "GameFramework/ProjectileMovementComponent.h"
+#include "SProjectileBase.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "SBlackholeProjectile.generated.h"
 
 UCLASS()
-class ACTIONROGUELIKE_API ASBlackholeProjectile : public AActor {
+class ACTIONROGUELIKE_API ASBlackholeProjectile : public ASProjectileBase {
   GENERATED_BODY()
 
 public:
@@ -18,16 +16,7 @@ public:
 
 protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-  USphereComponent* SphereComp;
-
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   URadialForceComponent* ForceComp;
-
-  UPROPERTY(VisibleAnywhere)
-  UProjectileMovementComponent* MovementComp;
-
-  UPROPERTY(VisibleAnywhere)
-  UParticleSystemComponent* ParticleComp;
 
   virtual void BeginPlay() override;
 

@@ -3,24 +3,9 @@
 
 #include "SBlackholeProjectile.h"
 
-#include "Particles/ParticleSystemComponent.h"
-
 ASBlackholeProjectile::ASBlackholeProjectile() {
-  PrimaryActorTick.bCanEverTick = true;
-
-  SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-  RootComponent = SphereComp;
-
   ForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("ForceComp"));
   ForceComp->SetupAttachment(SphereComp);
-
-  ParticleComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleComp"));
-  ParticleComp->SetupAttachment(SphereComp);
-
-  MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComp"));
-  MovementComp->InitialSpeed = 1000.0f;
-  MovementComp->bRotationFollowsVelocity = true;
-  MovementComp->bInitialVelocityInLocalSpace = true;
 }
 
 
