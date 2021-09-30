@@ -4,12 +4,14 @@
 #include "Components/ActorComponent.h"
 #include "SAttributeComponent.generated.h"
 
+class USAttributeComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(
   FOnHealthChanged,
   AActor*,
   InstigatorActor,
   USAttributeComponent*,
-  OwningPawn,
+  OwningComp,
   float,
   NewHealth,
   float,
