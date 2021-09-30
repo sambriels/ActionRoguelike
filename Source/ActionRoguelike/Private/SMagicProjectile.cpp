@@ -19,7 +19,7 @@ void ASMagicProjectile::OnActorOverlap(
   bool bFromSweep,
   const FHitResult& SweepResult
 ) {
-  if (OtherActor && !IsPendingKill()) {
+  if (OtherActor && OtherActor != GetInstigator()) {
     USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(
       OtherActor->GetComponentByClass(USAttributeComponent::StaticClass())
     );
