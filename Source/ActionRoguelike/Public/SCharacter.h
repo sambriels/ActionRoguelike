@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SInteractionComponent.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
 class UCameraComponent;
 class USpringArmComponent;
+class USInteractionComponent;
+class USAttributeComponent;
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter {
   GENERATED_BODY()
@@ -25,6 +26,9 @@ protected:
 
   UPROPERTY(EditAnywhere, Category="BlackHole")
   TSubclassOf<AActor> BlackHoleProjectileClass;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+  USAttributeComponent* AttributeComp;
 
   FTimerHandle TimerHandle_PrimaryAttack;
   FTimerHandle TimerHandle_DashProjectile;

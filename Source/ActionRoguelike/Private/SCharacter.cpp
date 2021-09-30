@@ -1,6 +1,8 @@
 #include "SCharacter.h"
 
 #include "DrawDebugHelpers.h"
+#include "SAttributeComponent.h"
+#include "SInteractionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -16,6 +18,8 @@ ASCharacter::ASCharacter() {
   CameraComponent->SetupAttachment(SpringArmComponent);
 
   InteractionComp = CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComponent"));
+
+  AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
 
   GetCharacterMovement()->bOrientRotationToMovement = true;
 
