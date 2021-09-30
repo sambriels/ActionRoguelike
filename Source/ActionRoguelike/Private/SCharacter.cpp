@@ -1,17 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SCharacter.h"
 
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-// Sets default values
 ASCharacter::ASCharacter() {
-  // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
   PrimaryActorTick.bCanEverTick = true;
 
   SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
@@ -31,7 +25,6 @@ ASCharacter::ASCharacter() {
 // Called when the game starts or when spawned
 void ASCharacter::BeginPlay() {
   Super::BeginPlay();
-
 }
 
 void ASCharacter::MoveForward(float Value) {
@@ -53,39 +46,78 @@ void ASCharacter::MoveRight(float Value) {
 
 void ASCharacter::PrimaryAttack() {
   PlayAnimMontage(AttackAnim);
-
   GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
 }
 
 void ASCharacter::PrimaryAttack_TimeElapsed() {
-  FVector RightHandLocation = GetMesh()->GetSocketLocation("Muzzle_01");;
-  FVector CameraLocation = CameraComponent->GetComponentLocation();
+  SpawnProjectile(PrimaryAttackProjectileClass);
+}
 
-  /**
-   * Since the location of the RightHand is different depending on the rotation of the character
-   * (and the camera might be offset as well), we need to calculate the impact point of the attack
-   * based on the camera location  and it's forward vector instead. This way it is much more intuitive
-   * for the player to gage what he will hit
-   */
-  FHitResult Hit;
-  FCollisionObjectQueryParams Params;
-  Params.AddObjectTypesToQuery(ECC_WorldDynamic);
-  Params.AddObjectTypesToQuery(ECC_WorldStatic);
-  FVector TraceEnd = CameraLocation + CameraComponent->GetForwardVector() * 100000.f;
-  bool bBLockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, CameraLocation, TraceEnd, Params);
-  FVector HitLocation = bBLockingHit ? Hit.Location : TraceEnd;
+void ASCharacter::DashProjectile() {
+  PlayAnimMontage(AttackAnim);
+  GetWorldTimerManager().SetTimer(TimerHandle_DashProjectile, this, &ASCharacter::DashProjectile_TimeElapsed, 0.2f);
+}
 
-  /** Calculates the rotation needed to arrive at the impact point from the trace */
-  FRotator FinalRotation = FRotationMatrix::MakeFromX(HitLocation - RightHandLocation).Rotator();
+void ASCharacter::DashProjectile_TimeElapsed() {
+  SpawnProjectile(DashProjectileClass);
+}
+
+void ASCharacter::BlackHoleProjectile() {
+  PlayAnimMontage(AttackAnim);
+  GetWorldTimerManager().SetTimer(
+    TimerHandle_BlackHoleProjectile,
+    this,
+    &ASCharacter::BlackHoleProjectile_TimeElapsed,
+    0.2f
+  );
+}
+
+void ASCharacter::BlackHoleProjectile_TimeElapsed() {
+  SpawnProjectile(BlackHoleProjectileClass);
+}
+
+void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ProjectileClass) {
   /**
-   * This transformation matrix determines the final impact point, based on the start location
-   * and the provided rotation
-   */
-  FTransform SpawnTM = FTransform(FinalRotation, RightHandLocation);
-  FActorSpawnParameters SpawnParams;
-  SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-  SpawnParams.Instigator = this;
-  GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+  * Since the location of the RightHand is different depending on the rotation of the character
+  * (and the camera might be offset as well), we need to calculate the impact point of the attack
+  * based on the camera location  and it's forward vector instead. This way it is much more intuitive
+  * for the player to gauge what he will hit
+  */
+  if (ensureAlways(ProjectileClass)) {
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    SpawnParams.Instigator = this;
+
+    FCollisionShape Shape;
+    Shape.SetSphere(0.1f);
+
+    // Ignore player
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+
+    FCollisionObjectQueryParams ObjParams;
+    ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+    ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+    ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+
+    FVector TraceStart = CameraComponent->GetComponentLocation();
+    FVector TraceEnd = TraceStart + (GetControlRotation().Vector() * 5000.f);
+
+    FHitResult Hit;
+    // Returns true if we found a blocking hit
+    if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params)) {
+      TraceEnd = Hit.ImpactPoint;
+      DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 20.f, 12, FColor::Turquoise, false, 3.f);
+    };
+
+    FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");;
+    // Calculates the rotation needed to arrive at the impact point from the trace
+    FRotator FinalRotation = FRotationMatrix::MakeFromX(FVector(TraceEnd - HandLocation).GetSafeNormal()).Rotator();
+
+    // Determines the final impact point
+    FTransform SpawnTransform = FTransform(FinalRotation, HandLocation);
+    GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
+  }
 }
 
 void ASCharacter::PrimaryInteract() {
@@ -147,6 +179,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
   PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
   PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
+  PlayerInputComponent->BindAction("BlackHoleProjectile", IE_Pressed, this, &ASCharacter::BlackHoleProjectile);
+  PlayerInputComponent->BindAction("DashProjectile", IE_Pressed, this, &ASCharacter::DashProjectile);
   PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
   PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 
