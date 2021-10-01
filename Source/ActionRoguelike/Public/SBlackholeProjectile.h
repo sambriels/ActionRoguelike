@@ -17,10 +17,4 @@ public:
 protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
   URadialForceComponent* ForceComp;
-
-  virtual void BeginPlay() override;
-
-public:
-  virtual void Tick(float DeltaTime) override;
-
 };

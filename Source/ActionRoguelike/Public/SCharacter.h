@@ -14,7 +14,25 @@ UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter {
   GENERATED_BODY()
 
+public:
+  ASCharacter();
+
+  virtual void PostInitializeComponents() override;
+  virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+  USAttributeComponent* AttributeComp;
+
+  UPROPERTY(VisibleAnywhere)
+  UCameraComponent* CameraComponent;
+
+  UPROPERTY(VisibleAnywhere)
+  USpringArmComponent* SpringArmComponent;
+
+  UPROPERTY(VisibleAnywhere)
+  USInteractionComponent* InteractionComp;
+
   UPROPERTY(EditAnywhere, Category="Attack")
   TSubclassOf<AActor> PrimaryAttackProjectileClass;
 
@@ -27,28 +45,10 @@ protected:
   UPROPERTY(EditAnywhere, Category="BlackHole")
   TSubclassOf<AActor> BlackHoleProjectileClass;
 
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-  USAttributeComponent* AttributeComp;
-
   FTimerHandle TimerHandle_PrimaryAttack;
   FTimerHandle TimerHandle_DashProjectile;
   FTimerHandle TimerHandle_BlackHoleProjectile;
 
-public:
-  // Sets default values for this character's properties
-  ASCharacter();
-
-protected:
-  UPROPERTY(VisibleAnywhere)
-  UCameraComponent* CameraComponent;
-
-  UPROPERTY(VisibleAnywhere)
-  USpringArmComponent* SpringArmComponent;
-
-  UPROPERTY(VisibleAnywhere)
-  USInteractionComponent* InteractionComp;
-
-  // Called when the game starts or when spawned
   virtual void BeginPlay() override;
 
   void MoveForward(float Value);
@@ -67,11 +67,7 @@ protected:
 
   void PrimaryInteract();
 
-public:
-  // Called every frame
-  virtual void Tick(float DeltaTime) override;
-
-  // Called to bind functionality to input
-  virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+  UFUNCTION()
+  void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 };
