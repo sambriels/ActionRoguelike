@@ -27,5 +27,4 @@ protected:
     const FHitResult& SweepResult
   );
   virtual void BeginPlay() override;
-  virtual void Explode_Implementation() override;
 };

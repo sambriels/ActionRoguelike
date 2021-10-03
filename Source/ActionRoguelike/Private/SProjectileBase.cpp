@@ -1,5 +1,8 @@
 #include "SProjectileBase.h"
 
+#include "Components/AudioComponent.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -18,6 +21,12 @@ ASProjectileBase::ASProjectileBase() {
   MoveComp->bInitialVelocityInLocalSpace = true;
   MoveComp->ProjectileGravityScale = 0.f;
   MoveComp->InitialSpeed = 8000.f;
+
+  AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+  AudioComp->SetupAttachment(SphereComp);
+
+  ImpactSound = CreateDefaultSubobject<USoundBase>(TEXT("ImpactSound"));
+
 }
 
 void ASProjectileBase::OnActorHit(
@@ -36,8 +45,19 @@ void ASProjectileBase::Explode_Implementation() {
   // Make sure we are not already in the process of being destroyed
   // Adding ensure to see if this triggers at all
   if (ensure(!IsPendingKill())) {
+    if (ImpactSound) {
+      UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), GetActorRotation());
+    }
     UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVfx, GetActorLocation(), GetActorRotation());
     Destroy();
+  }
+}
+
+void ASProjectileBase::BeginPlay() {
+  Super::BeginPlay();
+
+  if (AudioComp) {
+    AudioComp->Play();
   }
 }
 

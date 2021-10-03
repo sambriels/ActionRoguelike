@@ -140,9 +140,14 @@ void ASCharacter::OnHealthChanged(
   float NewHealth,
   float Delta
 ) {
-  if (NewHealth <= 0.f && Delta < 0.f) {
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    DisableInput(PC);
+  if (Delta < 0.f) {
+    GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
+    GetMesh()->SetVectorParameterValueOnMaterials("HitFlashColor", FVector(1, 0, 0));
+
+    if (NewHealth <= 0.f) {
+      APlayerController* PC = Cast<APlayerController>(GetController());
+      DisableInput(PC);
+    }
   }
 }
 

@@ -4,10 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
-#include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "SProjectileBase.generated.h"
-
 
 // Abstract marks this class as incomplete, so it won't show in certain dropdown windows like SpawnActor etc
 UCLASS(Abstract)
@@ -30,6 +28,12 @@ protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
   UParticleSystemComponent* VfxComp;
 
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
+  UAudioComponent* AudioComp;
+
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Sound")
+  USoundBase* ImpactSound;
+
   // 'virtual' so we can override this in child classes
   UFUNCTION()
   virtual void OnActorHit(
@@ -45,5 +49,6 @@ protected:
   UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
   void Explode();
 
+  virtual void BeginPlay() override;
   virtual void PostInitializeComponents() override;
 };

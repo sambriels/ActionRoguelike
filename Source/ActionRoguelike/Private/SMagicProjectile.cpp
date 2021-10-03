@@ -34,7 +34,3 @@ void ASMagicProjectile::BeginPlay() {
   Super::BeginPlay();
   SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASMagicProjectile::OnActorOverlap);
 }
-
-void ASMagicProjectile::Explode_Implementation() {
-  Super::Explode_Implementation();
-}
