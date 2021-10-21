@@ -29,6 +29,9 @@ protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
   float Health;
 
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  float MaxHealth;
+
 public:
   UFUNCTION(BlueprintCallable)
   bool IsAlive() const;

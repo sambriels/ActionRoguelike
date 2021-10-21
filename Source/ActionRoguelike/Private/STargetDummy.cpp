@@ -15,6 +15,6 @@ void ASTargetDummy::OnHealthChanged(
   float Delta
 ) {
   if (Delta < 0) {
-    MeshComp->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+    MeshComp->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
   }
 }
