@@ -26,7 +26,6 @@ ASProjectileBase::ASProjectileBase() {
   AudioComp->SetupAttachment(SphereComp);
 
   ImpactSound = CreateDefaultSubobject<USoundBase>(TEXT("ImpactSound"));
-
 }
 
 void ASProjectileBase::OnActorHit(

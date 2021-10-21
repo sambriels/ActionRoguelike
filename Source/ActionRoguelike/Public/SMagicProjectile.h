@@ -17,6 +17,9 @@ public:
   ASMagicProjectile();
 
 protected:
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Damage")
+  float DamageAmount;
+
   UFUNCTION()
   void OnActorOverlap(
     UPrimitiveComponent* OverlappedComponent,

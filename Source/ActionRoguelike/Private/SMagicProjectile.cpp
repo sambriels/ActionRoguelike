@@ -9,6 +9,8 @@
 // Sets default values
 ASMagicProjectile::ASMagicProjectile() {
   MoveComp->InitialSpeed = 6000.f;
+
+  DamageAmount = 0.f;
 }
 
 void ASMagicProjectile::OnActorOverlap(
@@ -24,7 +26,7 @@ void ASMagicProjectile::OnActorOverlap(
       OtherActor->GetComponentByClass(USAttributeComponent::StaticClass())
     );
     if (AttributeComp) {
-      AttributeComp->ApplyHealthChange(-20.f);
+      AttributeComp->ApplyHealthChange(DamageAmount);
       Destroy();
     }
   }
