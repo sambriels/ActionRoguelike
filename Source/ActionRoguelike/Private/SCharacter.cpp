@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ASCharacter::ASCharacter() {
   PrimaryActorTick.bCanEverTick = true;
@@ -24,6 +25,12 @@ ASCharacter::ASCharacter() {
   GetCharacterMovement()->bOrientRotationToMovement = true;
 
   bUseControllerRotationYaw = false;
+
+  AttackAnimDelay = 0.2f;
+
+  AttackSocketName = "Muzzle_01";
+  HitFlashTimeParamName = "HitFlashTime";
+  HitFlashColorParamName = "HitFlashColor";
 }
 
 void ASCharacter::PostInitializeComponents() {
@@ -53,8 +60,13 @@ void ASCharacter::MoveRight(float Value) {
 }
 
 void ASCharacter::PrimaryAttack() {
-  PlayAnimMontage(AttackAnim);
-  GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+  StartAttackEffect();
+  GetWorldTimerManager().SetTimer(
+    TimerHandle_PrimaryAttack,
+    this,
+    &ASCharacter::PrimaryAttack_TimeElapsed,
+    AttackAnimDelay
+  );
 }
 
 void ASCharacter::PrimaryAttack_TimeElapsed() {
@@ -62,8 +74,13 @@ void ASCharacter::PrimaryAttack_TimeElapsed() {
 }
 
 void ASCharacter::DashProjectile() {
-  PlayAnimMontage(AttackAnim);
-  GetWorldTimerManager().SetTimer(TimerHandle_DashProjectile, this, &ASCharacter::DashProjectile_TimeElapsed, 0.2f);
+  StartAttackEffect();
+  GetWorldTimerManager().SetTimer(
+    TimerHandle_DashProjectile,
+    this,
+    &ASCharacter::DashProjectile_TimeElapsed,
+    AttackAnimDelay
+  );
 }
 
 void ASCharacter::DashProjectile_TimeElapsed() {
@@ -71,12 +88,12 @@ void ASCharacter::DashProjectile_TimeElapsed() {
 }
 
 void ASCharacter::BlackHoleProjectile() {
-  PlayAnimMontage(AttackAnim);
+  StartAttackEffect();
   GetWorldTimerManager().SetTimer(
     TimerHandle_BlackHoleProjectile,
     this,
     &ASCharacter::BlackHoleProjectile_TimeElapsed,
-    0.2f
+    AttackAnimDelay
   );
 }
 
@@ -118,7 +135,7 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ProjectileClass) {
       DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 20.f, 12, FColor::Turquoise, false, 3.f);
     };
 
-    FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");;
+    FVector HandLocation = GetMesh()->GetSocketLocation(AttackSocketName);;
     // Calculates the rotation needed to arrive at the impact point from the trace
     FRotator FinalRotation = FRotationMatrix::MakeFromX(FVector(TraceEnd - HandLocation).GetSafeNormal()).Rotator();
 
@@ -134,6 +151,19 @@ void ASCharacter::PrimaryInteract() {
   }
 }
 
+void ASCharacter::StartAttackEffect() {
+  PlayAnimMontage(AttackAnim);
+
+  UGameplayStatics::SpawnEmitterAttached(
+    CastingEffect,
+    GetMesh(),
+    AttackSocketName,
+    FVector::ZeroVector,
+    FRotator::ZeroRotator,
+    EAttachLocation::SnapToTarget
+  );
+}
+
 void ASCharacter::OnHealthChanged(
   AActor* InstigatorActor,
   USAttributeComponent* OwningComp,
@@ -141,8 +171,8 @@ void ASCharacter::OnHealthChanged(
   float Delta
 ) {
   if (Delta < 0.f) {
-    GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
-    GetMesh()->SetVectorParameterValueOnMaterials("HitFlashColor", FVector(1, 0, 0));
+    GetMesh()->SetScalarParameterValueOnMaterials(HitFlashTimeParamName, GetWorld()->TimeSeconds);
+    GetMesh()->SetVectorParameterValueOnMaterials(HitFlashColorParamName, FVector(1, 0, 0));
 
     if (NewHealth <= 0.f) {
       APlayerController* PC = Cast<APlayerController>(GetController());

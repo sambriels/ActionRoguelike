@@ -24,25 +24,40 @@ protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
   USAttributeComponent* AttributeComp;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, Category="Components")
   UCameraComponent* CameraComponent;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, Category="Components")
   USpringArmComponent* SpringArmComponent;
 
-  UPROPERTY(VisibleAnywhere)
+  UPROPERTY(VisibleAnywhere, Category="Components")
   USInteractionComponent* InteractionComp;
 
-  UPROPERTY(EditAnywhere, Category="Attack")
-  TSubclassOf<AActor> PrimaryAttackProjectileClass;
+  UPROPERTY(VisibleAnywhere, Category="Names")
+  FName AttackSocketName;
 
-  UPROPERTY(EditAnywhere, Category="Dash Projectile")
-  TSubclassOf<AActor> DashProjectileClass;
+  UPROPERTY(VisibleAnywhere, Category="Names")
+  FName HitFlashTimeParamName;
+
+  UPROPERTY(VisibleAnywhere, Category="Names")
+  FName HitFlashColorParamName;
+
+  UPROPERTY(EditAnywhere, Category="Attack")
+  float AttackAnimDelay;
 
   UPROPERTY(EditAnywhere, Category="Attack")
   UAnimMontage* AttackAnim;
 
-  UPROPERTY(EditAnywhere, Category="BlackHole")
+  UPROPERTY(EditAnywhere, Category="Attack")
+  UParticleSystem* CastingEffect;
+
+  UPROPERTY(EditAnywhere, Category="Attack")
+  TSubclassOf<AActor> PrimaryAttackProjectileClass;
+
+  UPROPERTY(EditAnywhere, Category="Attack")
+  TSubclassOf<AActor> DashProjectileClass;
+
+  UPROPERTY(EditAnywhere, Category="Attack")
   TSubclassOf<AActor> BlackHoleProjectileClass;
 
   FTimerHandle TimerHandle_PrimaryAttack;
@@ -66,6 +81,8 @@ protected:
   void SpawnProjectile(TSubclassOf<AActor> ProjectileClass);
 
   void PrimaryInteract();
+
+  void StartAttackEffect();
 
   UFUNCTION()
   void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);

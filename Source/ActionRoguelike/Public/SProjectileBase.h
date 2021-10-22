@@ -7,6 +7,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "SProjectileBase.generated.h"
 
+class UCameraShakeBase;
+
 // Abstract marks this class as incomplete, so it won't show in certain dropdown windows like SpawnActor etc
 UCLASS(Abstract)
 class ACTIONROGUELIKE_API ASProjectileBase : public AActor {
@@ -16,6 +18,15 @@ public:
   ASProjectileBase();
 
 protected:
+  UPROPERTY(EditDefaultsOnly, Category="Effects|Shake")
+  TSubclassOf<UCameraShakeBase> ImpactShake;
+
+  UPROPERTY(EditAnywhere, Category="Effects|Shake")
+  float ImpactShakeInnerRadius;
+
+  UPROPERTY(EditAnywhere, Category="Effects|Shake")
+  float ImpactShakeOuterRadius;
+
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
   UParticleSystem* ImpactVfx;
 

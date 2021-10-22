@@ -25,6 +25,9 @@ ASProjectileBase::ASProjectileBase() {
   AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
   AudioComp->SetupAttachment(SphereComp);
 
+  ImpactShakeInnerRadius = 0.f;
+  ImpactShakeOuterRadius = 15000.f;
+
   ImpactSound = CreateDefaultSubobject<USoundBase>(TEXT("ImpactSound"));
 }
 
@@ -36,6 +39,7 @@ void ASProjectileBase::OnActorHit(
   const FHitResult& Hit
 ) {
   // Still call it without _Implementation from within C++
+
   Explode();
 }
 
@@ -48,6 +52,14 @@ void ASProjectileBase::Explode_Implementation() {
       UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), GetActorRotation());
     }
     UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVfx, GetActorLocation(), GetActorRotation());
+    // TODO: This does not work, cannot figure out why
+    UGameplayStatics::PlayWorldCameraShake(
+      this,
+      ImpactShake,
+      GetActorLocation(),
+      ImpactShakeInnerRadius,
+      ImpactShakeOuterRadius
+    );
     Destroy();
   }
 }
