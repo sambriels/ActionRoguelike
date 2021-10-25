@@ -21,7 +21,7 @@ void ASMagicProjectile::OnActorOverlap(
       OtherActor->GetComponentByClass(USAttributeComponent::StaticClass())
     );
     if (AttributeComp) {
-      AttributeComp->ApplyHealthChange(-DamageAmount);
+      AttributeComp->ApplyHealthChange(GetInstigator(), -DamageAmount);
       Destroy();
     }
   }

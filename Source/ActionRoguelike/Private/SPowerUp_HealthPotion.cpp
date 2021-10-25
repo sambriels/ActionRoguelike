@@ -13,7 +13,7 @@ void ASPowerUp_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
       InstigatorPawn->GetComponentByClass(USAttributeComponent::StaticClass())
     );
 
-    if (AttribComp->ApplyHealthChange(HealthAmount)) {
+    if (AttribComp->ApplyHealthChange(this, HealthAmount)) {
       Deactivate();
     }
   }

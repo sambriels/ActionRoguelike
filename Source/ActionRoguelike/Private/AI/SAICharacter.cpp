@@ -13,12 +13,24 @@ ASAICharacter::ASAICharacter() {
   AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
   AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
+  HitFlashTimeParamName = "HitFlashTime";
+  HitFlashColorParamName = "HitFlashColor";
 }
 
 void ASAICharacter::PostInitializeComponents() {
   Super::PostInitializeComponents();
   PawnSensingComp->OnSeePawn.AddDynamic(this, &ASAICharacter::OnPawnSeen);
   AttributeComp->OnHealthChanged.AddDynamic(this, &ASAICharacter::OnHealthChanged);
+}
+
+void ASAICharacter::SetTargetActor(AActor* NewTarget) {
+  AAIController* AIC = Cast<AAIController>(GetController());
+
+  if (AIC) {
+    UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
+    BBComp->SetValueAsObject("TargetActor", NewTarget);
+  }
 }
 
 void ASAICharacter::OnHealthChanged(
@@ -28,6 +40,14 @@ void ASAICharacter::OnHealthChanged(
   float Delta
 ) {
   if (Delta < 0.f) {
+
+    if (InstigatorActor != this) {
+      SetTargetActor(InstigatorActor);
+    }
+
+    GetMesh()->SetScalarParameterValueOnMaterials(HitFlashTimeParamName, GetWorld()->TimeSeconds);
+    GetMesh()->SetVectorParameterValueOnMaterials(HitFlashColorParamName, FVector(0, 1, 0));
+
     if (NewHealth <= 0.f) {
       // Stop behaviour tree
       AAIController* AIC = Cast<AAIController>(GetController());
@@ -46,13 +66,7 @@ void ASAICharacter::OnHealthChanged(
 }
 
 void ASAICharacter::OnPawnSeen(APawn* Pawn) {
-  AAIController* AIC = Cast<AAIController>(GetController());
+  SetTargetActor(Pawn);
+  // DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.f, true);
 
-  if (AIC) {
-    UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
-
-    BBComp->SetValueAsObject("TargetActor", Pawn);
-
-    // DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.f, true);
-  }
 }

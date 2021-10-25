@@ -15,6 +15,12 @@ public:
   ASAICharacter();
 
 protected:
+  UPROPERTY(VisibleAnywhere, Category="Effect")
+  FName HitFlashTimeParamName;
+
+  UPROPERTY(VisibleAnywhere, Category="Effect")
+  FName HitFlashColorParamName;
+
   virtual void PostInitializeComponents() override;
 
   UPROPERTY(VisibleAnywhere, Category="Components")
@@ -22,6 +28,8 @@ protected:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
   USAttributeComponent* AttributeComp;
+
+  void SetTargetActor(AActor* NewTarget);
 
   UFUNCTION()
   void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
