@@ -9,6 +9,7 @@
 
 class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
+class UCurveFloat;
 /**
  * 
  */
@@ -33,7 +34,7 @@ protected:
   TSubclassOf<AActor> MinionClass;
 
   UPROPERTY(EditDefaultsOnly, Category="AI")
-  UCurveFloat DifficultyCurve;
+  UCurveFloat* DifficultyCurve;
 
   UFUNCTION()
   void SpawnBotTimerElapsed();

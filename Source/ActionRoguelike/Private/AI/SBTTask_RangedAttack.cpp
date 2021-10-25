@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AI/SBTTask_RangedAttack.h"
 
 #include "AIController.h"
@@ -8,8 +5,6 @@
 #include "GameFramework/Character.h"
 
 EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
-  // return Super::ExecuteTask(OwnerComp, NodeMemory);
-
   AAIController* MyController = OwnerComp.GetAIOwner();
 
   if (ensure(MyController)) {

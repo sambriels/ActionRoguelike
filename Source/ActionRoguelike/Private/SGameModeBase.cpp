@@ -1,8 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SGameModeBase.h"
 
+#include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
 #include "SAttributeComponent.h"
 #include "AI/SAICharacter.h"
@@ -25,6 +23,30 @@ void ASGameModeBase::StartPlay() {
 }
 
 void ASGameModeBase::SpawnBotTimerElapsed() {
+  int32 NrOfAliveBots = 0;
+  for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It) {
+    ASAICharacter* Bot = *It;
+
+    USAttributeComponent* AttribComp = Cast<USAttributeComponent>(
+      Bot->GetComponentByClass(USAttributeComponent::StaticClass())
+    );
+    if (ensure(AttribComp) && AttribComp->IsAlive()) {
+      NrOfAliveBots++;
+    }
+  }
+
+  UE_LOG(LogTemp, Log, TEXT("Found %i alive bots"), NrOfAliveBots);
+
+  float MaxBotCount = 10.f;
+  if (ensure(DifficultyCurve)) {
+    MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->TimeSeconds);
+  }
+
+  if (NrOfAliveBots >= MaxBotCount) {
+    UE_LOG(LogTemp, Log, TEXT("At max capacity, skipping bot spawn"), NrOfAliveBots);
+    return;
+  }
+
   UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(
     this,
     SpawnBotQuery,
@@ -46,32 +68,10 @@ void ASGameModeBase::OnQueryCompleted(
     return;
   }
 
-  int32 NrOfAliveBots = 0;
-  for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It) {
-    ASAICharacter* Bot = *It;
-
-    USAttributeComponent* AttribComp = Cast<USAttributeComponent>(
-      Bot->GetComponentByClass(USAttributeComponent::StaticClass())
-    );
-    if (AttribComp && AttribComp->IsAlive()) {
-      NrOfAliveBots++;
-    }
-  }
-
-  float MaxBotCount = 10.f;
-  // TODO: this needs a check, check next lesson, nu bier tijd
-  if (DifficultyCurve) {
-    MaxBotCount = DifficultyCurve.GetFloatValue(GetWorld()->TimeSeconds);
-  }
-
-  if (NrOfAliveBots >= MaxBotCount) {
-    return;
-  }
-
-
   TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
 
   if (Locations.IsValidIndex(0)) {
+    DrawDebugSphere(GetWorld(), Locations[0], 50.f, 20, FColor::Blue, false, 60.f);
     GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
   }
 }

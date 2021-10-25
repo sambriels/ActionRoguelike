@@ -1,15 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SMagicProjectile.h"
 
 #include "SAttributeComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
-// Sets default values
 ASMagicProjectile::ASMagicProjectile() {
   MoveComp->InitialSpeed = 6000.f;
-
   DamageAmount = 0.f;
 }
 
@@ -26,7 +21,7 @@ void ASMagicProjectile::OnActorOverlap(
       OtherActor->GetComponentByClass(USAttributeComponent::StaticClass())
     );
     if (AttributeComp) {
-      AttributeComp->ApplyHealthChange(DamageAmount);
+      AttributeComp->ApplyHealthChange(-DamageAmount);
       Destroy();
     }
   }

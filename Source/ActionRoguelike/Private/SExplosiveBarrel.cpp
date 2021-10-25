@@ -1,12 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SExplosiveBarrel.h"
 
 #include "DrawDebugHelpers.h"
 #include "PhysicsEngine//RadialForceComponent.h"
 
-// Sets default values
 ASExplosiveBarrel::ASExplosiveBarrel() {
   MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   MeshComp->SetSimulatePhysics(true);
