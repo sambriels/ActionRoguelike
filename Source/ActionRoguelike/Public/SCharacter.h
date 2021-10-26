@@ -20,6 +20,9 @@ public:
   virtual void PostInitializeComponents() override;
   virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+  UFUNCTION(Exec)
+  void HealSelf(float Amount = 100.f);
+
 protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
   USAttributeComponent* AttributeComp;

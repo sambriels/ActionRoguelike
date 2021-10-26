@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "SAttributeComponent.h"
+#include "SWorldUserWidget.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
@@ -15,6 +16,12 @@ public:
   ASAICharacter();
 
 protected:
+  UPROPERTY()
+  USWorldUserWidget* ActiveHealthBar;
+
+  UPROPERTY(EditDefaultsOnly, Category="UI")
+  TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
   UPROPERTY(VisibleAnywhere, Category="Effect")
   FName HitFlashTimeParamName;
 

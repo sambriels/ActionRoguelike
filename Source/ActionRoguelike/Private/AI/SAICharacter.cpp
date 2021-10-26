@@ -4,7 +4,9 @@
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
 #include "SCharacter.h"
+#include "SWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
 
 ASAICharacter::ASAICharacter() {
@@ -43,6 +45,14 @@ void ASAICharacter::OnHealthChanged(
 
     if (InstigatorActor != this) {
       SetTargetActor(InstigatorActor);
+    }
+
+    if (ActiveHealthBar == nullptr) {
+      ActiveHealthBar = CreateWidget<USWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+      if (ActiveHealthBar) {
+        ActiveHealthBar->AttachedActor = this;
+        ActiveHealthBar->AddToViewport();
+      }
     }
 
     GetMesh()->SetScalarParameterValueOnMaterials(HitFlashTimeParamName, GetWorld()->TimeSeconds);
