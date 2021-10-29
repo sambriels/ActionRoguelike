@@ -38,12 +38,18 @@ protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
   float MaxHealth;
 
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  float LowHealthPercentage;
+
 public:
   UFUNCTION(BlueprintCallable)
   bool Kill(AActor* InstigatorActor);
 
   UFUNCTION(BlueprintCallable)
   bool IsAlive() const;
+
+  UFUNCTION(BlueprintCallable)
+  bool IsLowHealth() const;
 
   UFUNCTION(BlueprintCallable)
   bool IsFullHealth() const;

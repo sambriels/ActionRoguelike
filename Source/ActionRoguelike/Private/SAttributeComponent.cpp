@@ -3,6 +3,7 @@
 USAttributeComponent::USAttributeComponent() {
   MaxHealth = 100;
   Health = MaxHealth;
+  LowHealthPercentage = 0.5f;
 }
 
 
@@ -29,6 +30,19 @@ bool USAttributeComponent::Kill(AActor* InstigatorActor) {
 
 bool USAttributeComponent::IsAlive() const {
   return Health > 0.f;
+}
+
+bool USAttributeComponent::IsLowHealth() const {
+  UE_LOG(
+    LogTemp,
+    Warning,
+    TEXT("Is low health: %d, %i, %i, %i"),
+    Health / MaxHealth <= LowHealthPercentage,
+    Health,
+    MaxHealth,
+    LowHealthPercentage
+  );
+  return Health / MaxHealth <= LowHealthPercentage;
 }
 
 bool USAttributeComponent::IsFullHealth() const {
