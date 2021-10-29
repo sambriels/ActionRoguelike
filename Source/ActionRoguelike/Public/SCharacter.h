@@ -19,6 +19,7 @@ public:
 
   virtual void PostInitializeComponents() override;
   virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+  virtual FVector GetPawnViewLocation() const override;
 
   UFUNCTION(Exec)
   void HealSelf(float Amount = 100.f);

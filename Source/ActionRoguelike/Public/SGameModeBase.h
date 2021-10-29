@@ -21,6 +21,8 @@ public:
   ASGameModeBase();
   virtual void StartPlay() override;
 
+  virtual void OnActorKilled(AActor* VictimActor, AActor* Killer);
+
   UFUNCTION(Exec)
   void KillAll();
 
@@ -38,6 +40,9 @@ protected:
 
   UPROPERTY(EditDefaultsOnly, Category="AI")
   UCurveFloat* DifficultyCurve;
+
+  UFUNCTION()
+  void RespawnPlayerTimerElapsed(AController* Controller);
 
   UFUNCTION()
   void SpawnBotTimerElapsed();

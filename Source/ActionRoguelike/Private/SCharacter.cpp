@@ -197,6 +197,11 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
   PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
 }
 
+FVector ASCharacter::GetPawnViewLocation() const {
+  // return Super::GetPawnViewLocation();
+  return CameraComponent->GetComponentLocation();
+}
+
 void ASCharacter::HealSelf(float Amount /* = 100.f */) {
   AttributeComp->ApplyHealthChange(this, Amount);
 }

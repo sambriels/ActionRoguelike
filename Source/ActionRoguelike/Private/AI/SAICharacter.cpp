@@ -7,6 +7,8 @@
 #include "SWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 
 ASAICharacter::ASAICharacter() {
@@ -18,6 +20,9 @@ ASAICharacter::ASAICharacter() {
 
   HitFlashTimeParamName = "HitFlashTime";
   HitFlashColorParamName = "HitFlashColor";
+
+  GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+  GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 void ASAICharacter::PostInitializeComponents() {
@@ -58,6 +63,7 @@ void ASAICharacter::OnHealthChanged(
     GetMesh()->SetScalarParameterValueOnMaterials(HitFlashTimeParamName, GetWorld()->TimeSeconds);
     GetMesh()->SetVectorParameterValueOnMaterials(HitFlashColorParamName, FVector(0, 1, 0));
 
+    // Died
     if (NewHealth <= 0.f) {
       // Stop behaviour tree
       AAIController* AIC = Cast<AAIController>(GetController());
@@ -71,6 +77,8 @@ void ASAICharacter::OnHealthChanged(
       // set lifespan (how long untill destroy actor is called
       SetLifeSpan(10.f);
 
+      GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+      GetCharacterMovement()->DisableMovement();
     }
   }
 }

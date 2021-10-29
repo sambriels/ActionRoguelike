@@ -3,7 +3,15 @@
 #include "DrawDebugHelpers.h"
 #include "SGameplayInterface.h"
 
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(
+  TEXT("su.InteractionDebugDraw"),
+  false,
+  TEXT("Enable Debug lines for Interact component"),
+  ECVF_Cheat
+);
+
 void USInteractionComponent::PrimaryInteract() {
+  bool bDebugDraw = CVarDebugDrawInteraction.GetValueOnGameThread();
   FCollisionObjectQueryParams ObjectQueryParams;
   ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
@@ -14,9 +22,6 @@ void USInteractionComponent::PrimaryInteract() {
   MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
   FVector End = EyeLocation + (EyeRotation.Vector() * 1000.f);
-
-  // FHitResult Hit;
-  // bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
 
   TArray<FHitResult> Hits;
   FCollisionShape Shape;
@@ -40,12 +45,16 @@ void USInteractionComponent::PrimaryInteract() {
       if (HitActor->Implements<USGameplayInterface>()) {
         APawn* MyPawn = Cast<APawn>(MyOwner);
         ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
-        DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
+        if (bDebugDraw) {
+          DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
+        }
         break;
       }
     }
 
   }
 
-  // DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+  if (bDebugDraw) {
+    DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+  }
 }
