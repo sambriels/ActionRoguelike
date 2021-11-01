@@ -6,10 +6,6 @@
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
-class UCameraComponent;
-class USpringArmComponent;
-class USInteractionComponent;
-class USAttributeComponent;
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter {
   GENERATED_BODY()
@@ -25,20 +21,20 @@ public:
   void HealSelf(float Amount = 100.f);
 
 protected:
+  UPROPERTY(VisibleAnywhere, Category="Components")
+  class UCameraComponent* CameraComponent;
+
+  UPROPERTY(VisibleAnywhere, Category="Components")
+  class USpringArmComponent* SpringArmComponent;
+
+  UPROPERTY(VisibleAnywhere, Category="Components")
+  class USInteractionComponent* InteractionComp;
+
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-  USAttributeComponent* AttributeComp;
+  class USAttributeComponent* AttributeComp;
 
-  UPROPERTY(VisibleAnywhere, Category="Components")
-  UCameraComponent* CameraComponent;
-
-  UPROPERTY(VisibleAnywhere, Category="Components")
-  USpringArmComponent* SpringArmComponent;
-
-  UPROPERTY(VisibleAnywhere, Category="Components")
-  USInteractionComponent* InteractionComp;
-
-  UPROPERTY(VisibleAnywhere, Category="Names")
-  FName AttackSocketName;
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+  class USActionComponent* ActionComp;
 
   UPROPERTY(VisibleAnywhere, Category="Names")
   FName HitFlashTimeParamName;
@@ -46,47 +42,19 @@ protected:
   UPROPERTY(VisibleAnywhere, Category="Names")
   FName HitFlashColorParamName;
 
-  UPROPERTY(EditAnywhere, Category="Attack")
-  float AttackAnimDelay;
-
-  UPROPERTY(EditAnywhere, Category="Attack")
-  UAnimMontage* AttackAnim;
-
-  UPROPERTY(EditAnywhere, Category="Attack")
-  UParticleSystem* CastingEffect;
-
-  UPROPERTY(EditAnywhere, Category="Attack")
-  TSubclassOf<AActor> PrimaryAttackProjectileClass;
-
-  UPROPERTY(EditAnywhere, Category="Attack")
-  TSubclassOf<AActor> DashProjectileClass;
-
-  UPROPERTY(EditAnywhere, Category="Attack")
-  TSubclassOf<AActor> BlackHoleProjectileClass;
-
-  FTimerHandle TimerHandle_PrimaryAttack;
-  FTimerHandle TimerHandle_DashProjectile;
-  FTimerHandle TimerHandle_BlackHoleProjectile;
-
   virtual void BeginPlay() override;
 
   void MoveForward(float Value);
   void MoveRight(float Value);
 
+  void SprintStart();
+  void SprintStop();
+
   void PrimaryAttack();
-  void PrimaryAttack_TimeElapsed();
-
-  void BlackHoleProjectile();
-  void BlackHoleProjectile_TimeElapsed();
-
-  void DashProjectile();
-  void DashProjectile_TimeElapsed();
-
-  void SpawnProjectile(TSubclassOf<AActor> ProjectileClass);
+  void BlackHole();
+  void Dash();
 
   void PrimaryInteract();
-
-  void StartAttackEffect();
 
   UFUNCTION()
   void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);

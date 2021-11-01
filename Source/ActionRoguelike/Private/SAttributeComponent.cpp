@@ -42,15 +42,6 @@ bool USAttributeComponent::IsAlive() const {
 }
 
 bool USAttributeComponent::IsLowHealth() const {
-  UE_LOG(
-    LogTemp,
-    Warning,
-    TEXT("Is low health: %d, %i, %i, %i"),
-    Health / MaxHealth <= LowHealthPercentage,
-    Health,
-    MaxHealth,
-    LowHealthPercentage
-  );
   return Health / MaxHealth <= LowHealthPercentage;
 }
 
