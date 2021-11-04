@@ -20,5 +20,8 @@ protected:
   UPROPERTY(EditAnywhere, Category="HealthPotion")
   float HealthAmount;
 
+  UPROPERTY(EditDefaultsOnly, Category="HealthPotion")
+  int32 CreditsCost;
+
   virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 };

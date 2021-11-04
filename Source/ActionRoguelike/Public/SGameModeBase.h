@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SPowerUpBase.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
 #include "SGameModeBase.generated.h"
@@ -41,6 +42,22 @@ protected:
   UPROPERTY(EditDefaultsOnly, Category="AI")
   UCurveFloat* DifficultyCurve;
 
+  UPROPERTY(EditDefaultsOnly, Category="Credits")
+  int32 CreditsPerKill;
+
+  UPROPERTY(EditDefaultsOnly, Category="PowerUps")
+  TArray<TSubclassOf<ASPowerUpBase>> PowerUpClasses;
+
+  UPROPERTY(EditDefaultsOnly, Category="PowerUps")
+  UEnvQuery* PowerUpSpawnQuery;
+
+  UPROPERTY(EditDefaultsOnly, Category="PowerUps")
+  int32 DesiredPowerUpSpawnCount;;
+
+  UPROPERTY(EditDefaultsOnly, Category="PowerUps")
+  float MinimumSpawnDistanceFromOrigin;
+
+
   UFUNCTION()
   void RespawnPlayerTimerElapsed(AController* Controller);
 
@@ -48,5 +65,11 @@ protected:
   void SpawnBotTimerElapsed();
 
   UFUNCTION()
-  void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+  void OnBotSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
+  UFUNCTION()
+  void OnPowerUpSpawnQueryCompleted(
+    UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+    EEnvQueryStatus::Type QueryStatus
+  );
 };

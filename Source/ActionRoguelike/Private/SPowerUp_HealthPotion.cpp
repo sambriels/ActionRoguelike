@@ -1,8 +1,10 @@
 #include "SPowerUp_HealthPotion.h"
 #include "SAttributeComponent.h"
+#include "SPlayerState.h"
 
 ASPowerUp_HealthPotion::ASPowerUp_HealthPotion() {
   HealthAmount = 20.f;
+  CreditsCost = 1;
 }
 
 void ASPowerUp_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
@@ -14,7 +16,11 @@ void ASPowerUp_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
     );
 
     if (AttribComp->ApplyHealthChange(this, HealthAmount)) {
-      Deactivate();
+      ASPlayerState* PS = InstigatorPawn->GetPlayerState<ASPlayerState>();
+      if (ensure(PS)) {
+        PS->RemoveCredits(CreditsCost);
+        Deactivate();
+      }
     }
   }
 }
