@@ -3,6 +3,8 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
+#include "SActionComponent.h"
+#include "SAttributeComponent.h"
 #include "SCharacter.h"
 #include "SWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -17,6 +19,8 @@ ASAICharacter::ASAICharacter() {
   AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
   AttributeComp = CreateDefaultSubobject<USAttributeComponent>(TEXT("AttributeComp"));
+
+  ActionComp = CreateDefaultSubobject<USActionComponent>(TEXT("ActionComponent"));
 
   HitFlashTimeParamName = "HitFlashTime";
   HitFlashColorParamName = "HitFlashColor";

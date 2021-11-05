@@ -1,6 +1,6 @@
 #include "SMagicProjectile.h"
 
-#include "SAttributeComponent.h"
+#include "SActionComponent.h"
 #include "SGameplayFunctionLibrary.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -18,13 +18,17 @@ void ASMagicProjectile::OnActorOverlap(
   const FHitResult& SweepResult
 ) {
   if (OtherActor && OtherActor != GetInstigator()) {
-    // USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(
-    //   OtherActor->GetComponentByClass(USAttributeComponent::StaticClass())
-    // );
-    // if (AttributeComp) {
-    //   AttributeComp->ApplyHealthChange(GetInstigator(), -DamageAmount);
-    //   Destroy();
-    // }
+    const USActionComponent* ActionComponent = Cast<USActionComponent>(
+      OtherActor->GetComponentByClass(USActionComponent::StaticClass())
+    );
+
+    if (ActionComponent && ActionComponent->ActiveGameplayTags.HasTag(ParryTag)) {
+      MoveComp->Velocity = -MoveComp->Velocity;
+
+      SetInstigator(Cast<APawn>(OtherActor));
+      return;
+    }
+
     if (USGameplayFunctionLibrary::ApplyDirectionDamage(GetInstigator(), OtherActor, DamageAmount, SweepResult)) {
       Destroy();
     }

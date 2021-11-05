@@ -1,6 +1,7 @@
 #include "AI/SBTService_LowHealthCheck.h"
 
 #include "AIController.h"
+#include "SAttributeComponent.h"
 #include "AI/SAICharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
 

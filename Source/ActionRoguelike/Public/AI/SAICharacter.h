@@ -1,12 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SAttributeComponent.h"
-#include "SWorldUserWidget.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
-
-class UPawnSensingComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter {
@@ -17,7 +13,7 @@ public:
 
 protected:
   UPROPERTY()
-  USWorldUserWidget* ActiveHealthBar;
+  class USWorldUserWidget* ActiveHealthBar;
 
   UPROPERTY(EditDefaultsOnly, Category="UI")
   TSubclassOf<UUserWidget> HealthBarWidgetClass;
@@ -28,13 +24,16 @@ protected:
   UPROPERTY(VisibleAnywhere, Category="Effect")
   FName HitFlashColorParamName;
 
-  virtual void PostInitializeComponents() override;
-
   UPROPERTY(VisibleAnywhere, Category="Components")
-  UPawnSensingComponent* PawnSensingComp;
+  class UPawnSensingComponent* PawnSensingComp;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-  USAttributeComponent* AttributeComp;
+  class USAttributeComponent* AttributeComp;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+  class USActionComponent* ActionComp;
+
+  virtual void PostInitializeComponents() override;
 
   void SetTargetActor(AActor* NewTarget);
 

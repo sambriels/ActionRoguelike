@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "SProjectileBase.h"
 #include "SMagicProjectile.generated.h"
 
@@ -19,6 +20,9 @@ public:
 protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Damage")
   float DamageAmount;
+
+  UPROPERTY(EditDefaultsOnly, Category="Damage")
+  FGameplayTag ParryTag;
 
   UFUNCTION()
   void OnActorOverlap(
