@@ -9,6 +9,11 @@ ASMagicProjectile::ASMagicProjectile() {
   DamageAmount = 0.f;
 }
 
+void ASMagicProjectile::BeginPlay() {
+  Super::BeginPlay();
+  SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASMagicProjectile::OnActorOverlap);
+}
+
 void ASMagicProjectile::OnActorOverlap(
   UPrimitiveComponent* OverlappedComponent,
   AActor* OtherActor,
@@ -18,7 +23,7 @@ void ASMagicProjectile::OnActorOverlap(
   const FHitResult& SweepResult
 ) {
   if (OtherActor && OtherActor != GetInstigator()) {
-    const USActionComponent* ActionComponent = Cast<USActionComponent>(
+    USActionComponent* ActionComponent = Cast<USActionComponent>(
       OtherActor->GetComponentByClass(USActionComponent::StaticClass())
     );
 
@@ -30,12 +35,10 @@ void ASMagicProjectile::OnActorOverlap(
     }
 
     if (USGameplayFunctionLibrary::ApplyDirectionDamage(GetInstigator(), OtherActor, DamageAmount, SweepResult)) {
-      Destroy();
+      Explode();
+      if (ActionComponent) {
+        ActionComponent->AddAction(GetInstigator(), BurningActionClass);
+      }
     }
   }
-}
-
-void ASMagicProjectile::BeginPlay() {
-  Super::BeginPlay();
-  SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASMagicProjectile::OnActorOverlap);
 }

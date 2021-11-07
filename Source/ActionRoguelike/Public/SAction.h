@@ -9,6 +9,10 @@ class ACTIONROGUELIKE_API USAction : public UObject {
   GENERATED_BODY()
 
 public:
+  /* Start immediately when added to an ActionComponent */
+  UPROPERTY(EditDefaultsOnly, Category="Action")
+  bool bAutoStart;
+
   /* Action nickname to start/stop without a reference to the object */
   UPROPERTY(EditDefaultsOnly, Category="Action")
   FName ActionName;

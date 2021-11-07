@@ -6,7 +6,7 @@ USActionComponent::USActionComponent() {
   PrimaryComponentTick.bCanEverTick = true;
 }
 
-void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass) {
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
   if (!ensure(ActionClass)) {
     return;
   }
@@ -15,7 +15,17 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass) {
 
   if (ensure(NewAction)) {
     Actions.Add(NewAction);
+    if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator))) {
+      NewAction->StartAction(Instigator);
+    }
   }
+}
+
+void USActionComponent::RemoveAction(USAction* ActionToRemove) {
+  if (ActionToRemove && ensure(!ActionToRemove->IsRunning())) {
+    return;
+  }
+  Actions.Remove(ActionToRemove);
 }
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName) {
@@ -48,8 +58,8 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName) {
 void USActionComponent::BeginPlay() {
   Super::BeginPlay();
 
-  for (TSubclassOf<USAction> ActionClass : DefaultActions) {
-    AddAction(ActionClass);
+  for (const TSubclassOf<USAction> ActionClass : DefaultActions) {
+    AddAction(GetOwner(), ActionClass);
   }
 }
 
@@ -60,6 +70,6 @@ void USActionComponent::TickComponent(
 ) {
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-  FString DebugMessage = GetNameSafe(GetOwner()) + ": " + ActiveGameplayTags.ToStringSimple();
+  const FString DebugMessage = GetNameSafe(GetOwner()) + ": " + ActiveGameplayTags.ToStringSimple();
   GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, DebugMessage);
 }
