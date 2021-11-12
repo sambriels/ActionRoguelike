@@ -6,6 +6,7 @@
 #include "SActionComponent.generated.h"
 
 
+class USAction;
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API USActionComponent : public UActorComponent {
   GENERATED_BODY()
@@ -17,7 +18,10 @@ public:
   FGameplayTagContainer ActiveGameplayTags;
 
   UFUNCTION(BlueprintCallable, Category="Actions")
-  void AddAction(AActor* Instigator, TSubclassOf<class USAction> ActionClass);
+  bool AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass);
+
+  UFUNCTION(BlueprintCallable, Category="Actions")
+  bool HasAction(FName ActionName);
 
   UFUNCTION(BlueprintCallable, Category="Actions")
   void RemoveAction(USAction* ActionToRemove);
@@ -36,10 +40,10 @@ public:
 
 protected:
   UPROPERTY()
-  TArray<class USAction*> Actions;
+  TArray<USAction*> Actions;
 
   UPROPERTY(EditAnywhere, Category="Actions")
-  TArray<TSubclassOf<class USAction>> DefaultActions;
+  TArray<TSubclassOf<USAction>> DefaultActions;
 
   virtual void BeginPlay() override;
 

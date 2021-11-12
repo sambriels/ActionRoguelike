@@ -6,19 +6,40 @@ USActionComponent::USActionComponent() {
   PrimaryComponentTick.bCanEverTick = true;
 }
 
-void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
+bool USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
   if (!ensure(ActionClass)) {
-    return;
+    return false;
   }
 
   USAction* NewAction = NewObject<USAction>(this, ActionClass);
 
   if (ensure(NewAction)) {
+    if (HasAction(NewAction->ActionName)) {
+      UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("Already has action: %s, not adding another one"),
+        *NewAction->ActionName.ToString()
+      );
+      return false;
+    }
     Actions.Add(NewAction);
+    UE_LOG(LogTemp, Warning, TEXT("Added new action: %s"), *NewAction->ActionName.ToString());
     if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator))) {
       NewAction->StartAction(Instigator);
     }
+    return true;
   }
+  return false;
+}
+
+bool USActionComponent::HasAction(const FName ActionName) {
+  for (USAction* Action : Actions) {
+    if (Action && Action->ActionName == ActionName) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void USActionComponent::RemoveAction(USAction* ActionToRemove) {
