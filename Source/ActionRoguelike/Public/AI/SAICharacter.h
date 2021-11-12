@@ -18,6 +18,9 @@ protected:
   UPROPERTY(EditDefaultsOnly, Category="UI")
   TSubclassOf<UUserWidget> HealthBarWidgetClass;
 
+  UPROPERTY(EditDefaultsOnly, Category="UI")
+  TSubclassOf<UUserWidget> PlayerSpottedWidgetClass;
+
   UPROPERTY(VisibleAnywhere, Category="Effect")
   FName HitFlashTimeParamName;
 
@@ -37,9 +40,12 @@ protected:
 
   void SetTargetActor(AActor* NewTarget);
 
+  AActor* GetCurrentTargetActor() const;
+
   UFUNCTION()
   void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
   UFUNCTION()
   void OnPawnSeen(APawn* Pawn);
+
 };
