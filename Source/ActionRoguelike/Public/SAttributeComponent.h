@@ -18,6 +18,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(
   Delta
 );
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
+  FOnRageChanged,
+  USAttributeComponent*,
+  OwningComp,
+  float,
+  NewRage,
+  float,
+  Delta
+);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API USAttributeComponent : public UActorComponent {
   GENERATED_BODY()
@@ -41,6 +51,15 @@ protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
   float LowHealthPercentage;
 
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+  float Rage;
+
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  float MaxRage;
+
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  float RageMultiplier;
+
 public:
   UFUNCTION(BlueprintCallable)
   bool Kill(AActor* InstigatorActor);
@@ -60,6 +79,12 @@ public:
   UPROPERTY(BlueprintAssignable)
   FOnHealthChanged OnHealthChanged;
 
+  UPROPERTY(BlueprintAssignable)
+  FOnRageChanged OnRageChanged;
+
   UFUNCTION(BlueprintCallable, Category="Attributes")
   bool ApplyHealthChange(AActor* InstigatorActor, float Amount);
+
+  UFUNCTION(BlueprintCallable, Category="Attributes")
+  void ApplyRageChange(float Amount);
 };
