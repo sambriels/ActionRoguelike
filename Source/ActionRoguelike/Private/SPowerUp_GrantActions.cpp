@@ -12,10 +12,14 @@ void ASPowerUp_GrantActions::Interact_Implementation(APawn* InstigatorPawn) {
 
   if (ActionComp) {
     bool bGrantedAction = false;
-    for (TSubclassOf<USAction> Action : ActionClasses) {
-      if (ActionComp->AddAction(InstigatorPawn, *Action)) {
-        bGrantedAction = true;
+    for (const TSubclassOf<USAction> Action : ActionClasses) {
+      if (ActionComp->GetAction(Action)) {
+        FString DebugMsg = FString::Printf(TEXT("Action '%s' already known"), *GetNameSafe(Action));
+        GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, DebugMsg);
+        continue;
       }
+      ActionComp->AddAction(InstigatorPawn, Action);
+      bGrantedAction = true;
     }
     if (bGrantedAction) {
       Deactivate();
