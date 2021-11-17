@@ -42,11 +42,14 @@ public:
   static bool IsActorAlive(AActor* Actor);
 
 protected:
-  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes")
   float Health;
 
-  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category="Attributes")
   float MaxHealth;
+
+  UFUNCTION(NetMulticast, Reliable) // @FIXME: Mark as unreliable once we moved the state out of SCharacter
+  void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
 
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
   float LowHealthPercentage;

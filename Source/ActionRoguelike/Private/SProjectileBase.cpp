@@ -29,6 +29,8 @@ ASProjectileBase::ASProjectileBase() {
   ImpactShakeOuterRadius = 15000.f;
 
   ImpactSound = CreateDefaultSubobject<USoundBase>(TEXT("ImpactSound"));
+
+  SetReplicates(true);
 }
 
 void ASProjectileBase::OnActorHit(

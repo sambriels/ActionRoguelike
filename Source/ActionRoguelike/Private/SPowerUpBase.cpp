@@ -10,6 +10,8 @@ ASPowerUpBase::ASPowerUpBase() {
   MeshComp->SetupAttachment(SphereComp);
 
   RespawnInterval = 5.f;
+
+  SetReplicates(true);
 }
 
 void ASPowerUpBase::Interact_Implementation(APawn* InstigatorPawn) {

@@ -4,6 +4,8 @@
 
 USActionComponent::USActionComponent() {
   PrimaryComponentTick.bCanEverTick = true;
+
+  SetIsReplicatedByDefault(true);
 }
 
 void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass) {
@@ -45,6 +47,12 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName) 
         GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FailedMessage);
         continue;;
       }
+
+      // Is client?
+      if (!GetOwner()->HasAuthority()) {
+        ServerStartAction(Instigator, ActionName);
+      }
+
       Action->StartAction(Instigator);
       return true;
     }
@@ -81,4 +89,8 @@ void USActionComponent::TickComponent(
 
   const FString DebugMessage = GetNameSafe(GetOwner()) + ": " + ActiveGameplayTags.ToStringSimple();
   GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, DebugMessage);
+}
+
+void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName) {
+  StartActionByName(Instigator, ActionName);
 }
