@@ -1,23 +1,30 @@
 #include "SAction.h"
 
 #include "SActionComponent.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Net/UnrealNetwork.h"
+
+void USAction::Initialize(USActionComponent* NewActionComp) {
+  ActionComp = NewActionComp;
+}
 
 void USAction::StartAction_Implementation(AActor* Instigator) {
-  UE_LOG(LogTemp, Log, TEXT("Running: %s"), *GetNameSafe(this));
-
-  USActionComponent* ActionComp = GetOwningComponent();
-  ActionComp->ActiveGameplayTags.AppendTags(GrantsTags);
+  // UE_LOG(LogTemp, Log, TEXT("Running: %s"), *GetNameSafe(this));
+  LogOnScreen(this, FString::Printf(TEXT("Started: %s"), *ActionName.ToString()), FColor::Green);
+  USActionComponent* Comp = GetOwningComponent();
+  Comp->ActiveGameplayTags.AppendTags(GrantsTags);
 
   bIsRunning = true;
 }
 
 void USAction::StopAction_Implementation(AActor* Instigator) {
-  UE_LOG(LogTemp, Log, TEXT("Stopped: %s"), *GetNameSafe(this));
+  // UE_LOG(LogTemp, Log, TEXT("Stopped: %s"), *GetNameSafe(this));
+  LogOnScreen(this, FString::Printf(TEXT("Stopped: %s"), *ActionName.ToString()), FColor::White);
 
-  ensureAlways(bIsRunning);
+  // ensureAlways(bIsRunning);
 
-  USActionComponent* ActionComp = GetOwningComponent();
-  ActionComp->ActiveGameplayTags.RemoveTags(GrantsTags);
+  USActionComponent* Comp = GetOwningComponent();
+  Comp->ActiveGameplayTags.RemoveTags(GrantsTags);
 
   bIsRunning = false;
 }
@@ -28,9 +35,9 @@ bool USAction::CanStart_Implementation(AActor* Instigator) {
     return false;
   }
 
-  const USActionComponent* ActionComp = GetOwningComponent();
+  const USActionComponent* Comp = GetOwningComponent();
 
-  if (ActionComp->ActiveGameplayTags.HasAny(BlockedTags)) {
+  if (Comp->ActiveGameplayTags.HasAny(BlockedTags)) {
     return false;
   }
   return true;
@@ -39,10 +46,10 @@ bool USAction::CanStart_Implementation(AActor* Instigator) {
 UWorld* USAction::GetWorld() const {
   // Outer has been set when creating action via NewObject<T> in ActionComponent.cpp
   // `AddAction` function
-  UActorComponent* ActorComp = Cast<UActorComponent>(GetOuter());
+  AActor* Actor = Cast<AActor>(GetOuter());
 
-  if (ActorComp) {
-    return ActorComp->GetWorld();
+  if (Actor) {
+    return Actor->GetWorld();
   }
   return nullptr;
 }
@@ -51,6 +58,21 @@ bool USAction::IsRunning() const {
   return bIsRunning;
 }
 
+void USAction::OnRep_IsRunning() {
+  if (bIsRunning) {
+    StartAction(nullptr);
+  } else {
+    StopAction(nullptr);
+  }
+}
+
 USActionComponent* USAction::GetOwningComponent() const {
-  return Cast<USActionComponent>(GetOuter());
+  return ActionComp;
+}
+
+void USAction::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+  Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+  DOREPLIFETIME(USAction, bIsRunning);
+  DOREPLIFETIME(USAction, ActionComp);
 }

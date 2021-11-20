@@ -1,6 +1,9 @@
 #include "SActionComponent.h"
 
 #include "SAction.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Engine/ActorChannel.h"
+#include "Net/UnrealNetwork.h"
 
 USActionComponent::USActionComponent() {
   PrimaryComponentTick.bCanEverTick = true;
@@ -13,9 +16,10 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> Acti
     return;
   }
 
-  USAction* NewAction = NewObject<USAction>(this, ActionClass);
+  USAction* NewAction = NewObject<USAction>(GetOwner(), ActionClass);
 
   if (ensure(NewAction)) {
+    NewAction->Initialize(this);
     Actions.Add(NewAction);
     if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator))) {
       NewAction->StartAction(Instigator);
@@ -75,8 +79,11 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName) {
 void USActionComponent::BeginPlay() {
   Super::BeginPlay();
 
-  for (const TSubclassOf<USAction> ActionClass : DefaultActions) {
-    AddAction(GetOwner(), ActionClass);
+  // Server only
+  if (GetOwner()->HasAuthority()) {
+    for (const TSubclassOf<USAction> ActionClass : DefaultActions) {
+      AddAction(GetOwner(), ActionClass);
+    }
   }
 }
 
@@ -87,10 +94,47 @@ void USActionComponent::TickComponent(
 ) {
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-  const FString DebugMessage = GetNameSafe(GetOwner()) + ": " + ActiveGameplayTags.ToStringSimple();
-  GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, DebugMessage);
+  // const FString DebugMessage = GetNameSafe(GetOwner()) + ": " + ActiveGameplayTags.ToStringSimple();
+  // GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::White, DebugMessage);
+
+  for (const USAction* Action : Actions) {
+    const FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
+
+    const FString ActionMsg = FString::Printf(
+      TEXT("[%s] Action: %s : IsRunning: %s : Outer : %s"),
+      *GetNameSafe(GetOwner()),
+      *Action->ActionName.ToString(),
+      Action->IsRunning() ? TEXT("true") : TEXT("false"),
+      *GetNameSafe(Action->GetOuter())
+    );
+
+    LogOnScreen(this, ActionMsg, TextColor, 0.f);
+  }
+}
+
+bool USActionComponent::ReplicateSubobjects(
+  UActorChannel* Channel,
+  FOutBunch* Bunch,
+  FReplicationFlags* RepFlags
+) {
+  bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+  for (USAction* Action : Actions) {
+    if (Action) {
+      WroteSomething |= Channel->ReplicateSubobject(Action, *Bunch, *RepFlags);
+    }
+  }
+  return WroteSomething;
 }
 
 void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName) {
   StartActionByName(Instigator, ActionName);
+}
+
+void USActionComponent::GetLifetimeReplicatedProps(
+  TArray<FLifetimeProperty>& OutLifetimeProps
+) const {
+  Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+  DOREPLIFETIME(USActionComponent, Actions);
 }

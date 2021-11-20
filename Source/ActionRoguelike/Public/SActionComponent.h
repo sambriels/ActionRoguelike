@@ -38,11 +38,17 @@ public:
     FActorComponentTickFunction* ThisTickFunction
   ) override;
 
+  virtual bool ReplicateSubobjects(
+    UActorChannel* Channel,
+    FOutBunch* Bunch,
+    FReplicationFlags* RepFlags
+  ) override;
+
 protected:
   UFUNCTION(Server, Reliable)
   void ServerStartAction(AActor* Instigator, FName ActionName);
 
-  UPROPERTY()
+  UPROPERTY(Replicated)
   TArray<USAction*> Actions;
 
   UPROPERTY(EditAnywhere, Category="Actions")
