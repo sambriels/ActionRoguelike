@@ -35,7 +35,9 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor) {
 
 USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor) {
   if (FromActor) {
-    return Cast<USAttributeComponent>(FromActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+    return Cast<USAttributeComponent>(
+      FromActor->GetComponentByClass(USAttributeComponent::StaticClass())
+    );
   }
   return nullptr;
 }
@@ -73,20 +75,24 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Amou
   }
 
   const float OldHealth = Health;
-  Health = FMath::Clamp<float>(OldHealth + Amount, 0, MaxHealth);
+  float NewHealth = FMath::Clamp<float>(OldHealth + Amount, 0, MaxHealth);
+  const float Delta = NewHealth - OldHealth;
 
-  const float Delta = Health - OldHealth;
-  // OnHealthChanged.Broadcast(InstigatorActor, this, Health, Delta);
-  if (Delta != 0.f) {
-    MulticastHealthChanged(InstigatorActor, Health, Delta);
-  }
+  // Is Server? Only then apply actual Health change
+  if (GetOwner()->HasAuthority()) {
+    Health = NewHealth;
 
-  // Died
-  if (Delta <= 0.f && Health == 0.0f) {
-    ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+    if (Delta != 0.f) {
+      MulticastHealthChanged(InstigatorActor, Health, Delta);
+    }
 
-    if (GM) {
-      GM->OnActorKilled(GetOwner(), InstigatorActor);
+    // Died
+    if (Delta <= 0.f && Health == 0.0f) {
+      ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+
+      if (GM) {
+        GM->OnActorKilled(GetOwner(), InstigatorActor);
+      }
     }
   }
 
@@ -111,7 +117,9 @@ void USAttributeComponent::MulticastHealthChanged_Implementation(
 }
 
 
-void USAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+void USAttributeComponent::GetLifetimeReplicatedProps(
+  TArray<FLifetimeProperty>& OutLifetimeProps
+) const {
   Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
   DOREPLIFETIME(USAttributeComponent, Health);

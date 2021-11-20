@@ -16,6 +16,16 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> Acti
     return;
   }
 
+  // Skip for clients
+  if (!GetOwner()->HasAuthority()) {
+    UE_LOG(
+      LogTemp,
+      Warning,
+      TEXT("Client attempting to AddAction. [Class %s]"),
+      *GetNameSafe(ActionClass)
+    );
+  }
+
   USAction* NewAction = NewObject<USAction>(GetOwner(), ActionClass);
 
   if (ensure(NewAction)) {
@@ -68,6 +78,11 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName) {
   for (USAction* Action : Actions) {
     if (Action && Action->ActionName == ActionName) {
       if (Action->IsRunning()) {
+        // Is client?
+        if (!GetOwner()->HasAuthority()) {
+          ServerStopAction(Instigator, ActionName);
+        }
+
         Action->StopAction(Instigator);
         return true;
       }
@@ -101,11 +116,9 @@ void USActionComponent::TickComponent(
     const FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
 
     const FString ActionMsg = FString::Printf(
-      TEXT("[%s] Action: %s : IsRunning: %s : Outer : %s"),
+      TEXT("[%s] Action: %s"),
       *GetNameSafe(GetOwner()),
-      *Action->ActionName.ToString(),
-      Action->IsRunning() ? TEXT("true") : TEXT("false"),
-      *GetNameSafe(Action->GetOuter())
+      *GetNameSafe(Action)
     );
 
     LogOnScreen(this, ActionMsg, TextColor, 0.f);
@@ -125,6 +138,10 @@ bool USActionComponent::ReplicateSubobjects(
     }
   }
   return WroteSomething;
+}
+
+void USActionComponent::ServerStopAction_Implementation(AActor* Instigator, FName ActionName) {
+  StopActionByName(Instigator, ActionName);
 }
 
 void USActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName) {

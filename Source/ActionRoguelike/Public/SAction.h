@@ -5,6 +5,18 @@
 #include "SActionComponent.h"
 #include "SAction.generated.h"
 
+USTRUCT()
+struct FActionRepData {
+  GENERATED_BODY()
+
+public:
+  UPROPERTY()
+  bool bIsRunning;
+
+  UPROPERTY()
+  AActor* Instigator;
+};
+
 UCLASS(Blueprintable)
 class ACTIONROGUELIKE_API USAction : public UObject {
   GENERATED_BODY()
@@ -29,28 +41,14 @@ public:
   UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Action")
   void StopAction(AActor* Instigator);
 
-  virtual class UWorld* GetWorld() const override;
-
   UFUNCTION(BlueprintCallable, Category="Action")
   bool IsRunning() const;
 
-  virtual bool IsSupportedForNetworking() const override {
-    return true;
-  }
+  virtual class UWorld* GetWorld() const override;
+
+  virtual bool IsSupportedForNetworking() const override { return true; }
 
 protected:
-  UPROPERTY(Replicated)
-  USActionComponent* ActionComp;
-
-  UPROPERTY(ReplicatedUsing="OnRep_IsRunning")
-  bool bIsRunning;
-
-  UFUNCTION()
-  void OnRep_IsRunning();
-
-  UFUNCTION(BlueprintCallable, Category="Action")
-  class USActionComponent* GetOwningComponent() const;
-
   /* Tag added to owning actor when activated, removed when actions stops */
   UPROPERTY(EditDefaultsOnly, Category="Tags")
   FGameplayTagContainer GrantsTags;
@@ -58,4 +56,16 @@ protected:
   /* Action can only start if owning actor has none of these tags applied */
   UPROPERTY(EditDefaultsOnly, Category="Tags")
   FGameplayTagContainer BlockedTags;
+
+  UPROPERTY(Replicated)
+  USActionComponent* ActionComp;
+
+  UPROPERTY(ReplicatedUsing="OnRep_RepData")
+  FActionRepData RepData;
+
+  UFUNCTION()
+  void OnRep_RepData();
+
+  UFUNCTION(BlueprintCallable, Category="Action")
+  class USActionComponent* GetOwningComponent() const;
 };

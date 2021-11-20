@@ -97,6 +97,8 @@ void ASCharacter::OnHealthChanged(
     if (NewHealth <= 0.f) {
       APlayerController* PC = Cast<APlayerController>(GetController());
       DisableInput(PC);
+
+      SetLifeSpan(5.f);
     }
   }
 }
@@ -114,7 +116,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
   PlayerInputComponent->BindAction("BlackHole", IE_Pressed, this, &ASCharacter::BlackHole);
   PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &ASCharacter::Dash);
   PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-  PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);
+  PlayerInputComponent->BindAction(
+    "PrimaryInteract",
+    IE_Pressed,
+    this,
+    &ASCharacter::PrimaryInteract
+  );
 
   PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::SprintStart);
   PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::SprintStop);

@@ -24,10 +24,18 @@ void USAction_ProjectileAttack::StartAction_Implementation(AActor* Instigator) {
       EAttachLocation::SnapToTarget
     );
 
-    FTimerHandle TimerHandle_AttackDelay;
-    FTimerDelegate Delegate;
-    Delegate.BindUFunction(this, "AttackDelay_Elapsed", Character);
-    GetWorld()->GetTimerManager().SetTimer(TimerHandle_AttackDelay, Delegate, AttackAnimDelay, false);
+
+    if (Character->HasAuthority()) {
+      FTimerHandle TimerHandle_AttackDelay;
+      FTimerDelegate Delegate;
+      Delegate.BindUFunction(this, "AttackDelay_Elapsed", Character);
+      GetWorld()->GetTimerManager().SetTimer(
+        TimerHandle_AttackDelay,
+        Delegate,
+        AttackAnimDelay,
+        false
+      );
+    }
   }
 
 }
@@ -61,14 +69,24 @@ void USAction_ProjectileAttack::AttackDelay_Elapsed(ASCharacter* InstigatorChara
 
     FHitResult Hit;
     // Returns true if we found a blocking hit
-    if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params)) {
+    if (GetWorld()->SweepSingleByObjectType(
+      Hit,
+      TraceStart,
+      TraceEnd,
+      FQuat::Identity,
+      ObjParams,
+      Shape,
+      Params
+    )) {
       TraceEnd = Hit.ImpactPoint;
       DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 20.f, 12, FColor::Turquoise, false, 3.f);
     };
 
     FVector HandLocation = InstigatorCharacter->GetMesh()->GetSocketLocation(AttackSocketName);;
     // Calculates the rotation needed to arrive at the impact point from the trace
-    FRotator FinalRotation = FRotationMatrix::MakeFromX(FVector(TraceEnd - HandLocation).GetSafeNormal()).Rotator();
+    FRotator FinalRotation = FRotationMatrix::MakeFromX(
+      FVector(TraceEnd - HandLocation).GetSafeNormal()
+    ).Rotator();
 
     // Determines the final impact point
     FTransform SpawnTransform = FTransform(FinalRotation, HandLocation);
