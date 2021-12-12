@@ -18,8 +18,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(
   Delta
 );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(
   FOnRageChanged,
+  AActor*,
+  InstigatorActor,
   USAttributeComponent*,
   OwningComp,
   float,
@@ -48,16 +50,21 @@ protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category="Attributes")
   float MaxHealth;
 
-  UFUNCTION(NetMulticast, Reliable) // @FIXME: Mark as unreliable once we moved the state out of SCharacter
+  UFUNCTION(NetMulticast, Reliable)
+  // @FIXME: Mark as unreliable once we moved the state out of SCharacter
   void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+
+  UFUNCTION(NetMulticast, Unreliable)
+  // Used for cosmetic only, therefore marked as unreliable
+  void MulticastRageChanged(AActor* InstigatorActor, float NewRage, float Delta);
 
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
   float LowHealthPercentage;
 
-  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes")
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes")
   float Rage;
 
-  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
+  UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category="Attributes")
   float MaxRage;
 
   UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Attributes")
@@ -89,5 +96,5 @@ public:
   bool ApplyHealthChange(AActor* InstigatorActor, float Amount);
 
   UFUNCTION(BlueprintCallable, Category="Attributes")
-  void ApplyRageChange(float Amount);
+  void ApplyRageChange(AActor* InstigatorActor, float Amount);
 };

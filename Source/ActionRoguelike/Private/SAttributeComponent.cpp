@@ -67,19 +67,20 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Amou
     return false;
   }
 
-  if (Amount < 0.f) {
-    float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
-    Amount *= DamageMultiplier;
-
-    ApplyRageChange(FMath::Abs(Amount) * RageMultiplier);
-  }
-
   const float OldHealth = Health;
   float NewHealth = FMath::Clamp<float>(OldHealth + Amount, 0, MaxHealth);
   const float Delta = NewHealth - OldHealth;
 
   // Is Server? Only then apply actual Health change
   if (GetOwner()->HasAuthority()) {
+
+    if (Amount < 0.f) {
+      float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
+      Amount *= DamageMultiplier;
+
+      ApplyRageChange(InstigatorActor, FMath::Abs(Amount) * RageMultiplier);
+    }
+
     Health = NewHealth;
 
     if (Delta != 0.f) {
@@ -99,13 +100,13 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Amou
   return Delta != 0;
 }
 
-void USAttributeComponent::ApplyRageChange(float Amount) {
+void USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Amount) {
   const float OldRage = Rage;
   const float RoundedValue = FMath::Floor(OldRage + Amount);
   Rage = FMath::Clamp<float>(RoundedValue, 0, MaxRage);
 
   const float Delta = Rage + OldRage;
-  OnRageChanged.Broadcast(this, Rage, Delta);
+  MulticastRageChanged(InstigatorActor, Rage, Delta);
 }
 
 void USAttributeComponent::MulticastHealthChanged_Implementation(
@@ -116,6 +117,13 @@ void USAttributeComponent::MulticastHealthChanged_Implementation(
   OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
 }
 
+void USAttributeComponent::MulticastRageChanged_Implementation(
+  AActor* InstigatorActor,
+  float NewRage,
+  float Delta
+) {
+  OnRageChanged.Broadcast(InstigatorActor, this, NewRage, Delta);
+}
 
 void USAttributeComponent::GetLifetimeReplicatedProps(
   TArray<FLifetimeProperty>& OutLifetimeProps
@@ -124,6 +132,9 @@ void USAttributeComponent::GetLifetimeReplicatedProps(
 
   DOREPLIFETIME(USAttributeComponent, Health);
   DOREPLIFETIME(USAttributeComponent, MaxHealth);
+
+  DOREPLIFETIME(USAttributeComponent, Rage);
+  DOREPLIFETIME(USAttributeComponent, MaxRage);
 
   // DOREPLIFETIME_CONDITION(USAttributeComponent, MaxHealth, COND_OwnerOnly);
 }

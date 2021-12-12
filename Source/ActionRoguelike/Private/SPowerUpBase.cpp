@@ -1,5 +1,7 @@
 #include "SPowerUpBase.h"
 
+#include "Net/UnrealNetwork.h"
+
 ASPowerUpBase::ASPowerUpBase() {
   SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
   SphereComp->SetCollisionProfileName("PowerUp");
@@ -9,24 +11,40 @@ ASPowerUpBase::ASPowerUpBase() {
   MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   MeshComp->SetupAttachment(SphereComp);
 
-  RespawnInterval = 5.f;
+  bReplicates = true;
 
-  SetReplicates(true);
+  RespawnInterval = 5.f;
+  bIsActive = true;
 }
 
 void ASPowerUpBase::Interact_Implementation(APawn* InstigatorPawn) {
   ISGameplayInterface::Interact_Implementation(InstigatorPawn);
 }
 
+void ASPowerUpBase::OnRep_IsActive() {
+  RootComponent->SetVisibility(bIsActive, true);
+  SetActorEnableCollision(bIsActive);
+}
+
 void ASPowerUpBase::Deactivate() {
-  RootComponent->ToggleVisibility(true);
-  SetActorEnableCollision(false);
+  bIsActive = false;
+  OnRep_IsActive();
 
   FTimerHandle TimerHandle_Reactivate;
-  GetWorldTimerManager().SetTimer(TimerHandle_Reactivate, this, &ASPowerUpBase::Reactivate, RespawnInterval);
+  GetWorldTimerManager().SetTimer(
+    TimerHandle_Reactivate,
+    this,
+    &ASPowerUpBase::Reactivate,
+    RespawnInterval
+  );
 }
 
 void ASPowerUpBase::Reactivate() {
-  RootComponent->ToggleVisibility(true);
-  SetActorEnableCollision(true);
+  bIsActive = true;
+  OnRep_IsActive();
+}
+
+void ASPowerUpBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+  Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+  DOREPLIFETIME(ASPowerUpBase, bIsActive);
 }

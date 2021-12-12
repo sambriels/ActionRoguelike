@@ -23,7 +23,13 @@ protected:
   UPROPERTY(EditAnywhere, Category="PowerUp")
   float RespawnInterval;
 
+  UPROPERTY(EditDefaultsOnly, ReplicatedUsing="OnRep_IsActive")
+  bool bIsActive;
+
   virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+
+  UFUNCTION()
+  void OnRep_IsActive();
 
   UFUNCTION()
   void Deactivate();

@@ -18,7 +18,11 @@ void ASPowerUp_HealthPotion::Interact_Implementation(APawn* InstigatorPawn) {
     if (AttribComp->ApplyHealthChange(this, HealthAmount)) {
       ASPlayerState* PS = InstigatorPawn->GetPlayerState<ASPlayerState>();
       if (ensure(PS)) {
-        PS->RemoveCredits(CreditsCost);
+        if (GetOwner()->HasAuthority()) {
+          UE_LOG(LogTemp, Warning, TEXT("HAS ATHORITY REMOVING CREDIT"))
+          PS->RemoveCredits(CreditsCost);
+          bIsActive = false;
+        }
         Deactivate();
       }
     }

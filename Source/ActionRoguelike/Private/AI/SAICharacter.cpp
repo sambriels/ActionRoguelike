@@ -100,8 +100,17 @@ void ASAICharacter::OnHealthChanged(
 void ASAICharacter::OnPawnSeen(APawn* Pawn) {
   if (Cast<APawn>(GetCurrentTargetActor()) != Pawn && ensure(PlayerSpottedWidgetClass)) {
     SetTargetActor(Pawn);
-    USWorldUserWidget* PlayerSpottedWidget = CreateWidget<USWorldUserWidget>(GetWorld(), PlayerSpottedWidgetClass);
-    PlayerSpottedWidget->AttachedActor = this;
-    PlayerSpottedWidget->AddToViewport();
+
+    MultiCastPawnSeen();
   }
+}
+
+void ASAICharacter::MultiCastPawnSeen_Implementation() {
+  USWorldUserWidget* PlayerSpottedWidget = CreateWidget<USWorldUserWidget>(
+    GetWorld(),
+    PlayerSpottedWidgetClass
+  );
+  PlayerSpottedWidget->AttachedActor = this;
+  // If no index specified, may end up behind player health bar
+  PlayerSpottedWidget->AddToViewport(10);
 }

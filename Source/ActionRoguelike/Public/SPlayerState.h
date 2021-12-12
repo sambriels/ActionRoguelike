@@ -28,7 +28,7 @@ public:
   void RemoveCredits(int32 Delta);
 
   UFUNCTION(BlueprintCallable, Category="Credits")
-  int32 GetCredits();
+  int32 GetCredits() const;
 
   UPROPERTY(BlueprintAssignable)
   FOnCreditsChanged OnCreditsChanged;
@@ -36,6 +36,9 @@ public:
 protected:
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditDefaultsOnly, Category="Credits")
+  UPROPERTY(EditDefaultsOnly, ReplicatedUsing="OnRep_Credits", Category="Credits")
   int32 Credits;
+
+  UFUNCTION()
+  void OnRep_Credits(int32 OldCredits);
 };
