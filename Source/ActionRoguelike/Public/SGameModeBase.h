@@ -8,6 +8,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameModeBase.generated.h"
 
+class USSaveGame;
 class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
 class UCurveFloat;
@@ -22,12 +23,30 @@ public:
   ASGameModeBase();
   virtual void StartPlay() override;
 
+  virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+  virtual void InitGame(
+    const FString& MapName,
+    const FString& Options,
+    FString& ErrorMessage
+  ) override;
+
   virtual void OnActorKilled(AActor* VictimActor, AActor* Killer);
 
   UFUNCTION(Exec)
   void KillAll();
 
+  UFUNCTION(BlueprintCallable, Category="Save Game")
+  void WriteSaveGame();
+
+  void LoadSaveGame();
+
 protected:
+  FString SlotName;
+
+  UPROPERTY()
+  USSaveGame* CurrentSaveGame;
+
   FTimerHandle TimerHandle_SpawnBots;
 
   UPROPERTY(EditDefaultsOnly, Category="AI")
@@ -65,7 +84,10 @@ protected:
   void SpawnBotTimerElapsed();
 
   UFUNCTION()
-  void OnBotSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+  void OnBotSpawnQueryCompleted(
+    UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+    EEnvQueryStatus::Type QueryStatus
+  );
 
   UFUNCTION()
   void OnPowerUpSpawnQueryCompleted(

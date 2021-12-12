@@ -18,8 +18,11 @@ class USGameplayInterface : public UInterface {
 class ACTIONROGUELIKE_API ISGameplayInterface {
   GENERATED_BODY()
 
-  // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+  // Called after the Actor state was restored from SaveGame file
+  UFUNCTION(BlueprintNativeEvent)
+  void OnActorLoaded();
+
   UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
   void Interact(APawn* InstigatorPawn);
 };

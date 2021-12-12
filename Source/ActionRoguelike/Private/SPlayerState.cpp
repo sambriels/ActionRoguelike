@@ -1,5 +1,6 @@
 #include "SPlayerState.h"
 
+#include "SSaveGame.h"
 #include "Net/UnrealNetwork.h"
 
 ASPlayerState::ASPlayerState() {
@@ -18,6 +19,18 @@ void ASPlayerState::RemoveCredits(const int32 Delta) {
 
 int32 ASPlayerState::GetCredits() const {
   return Credits;
+}
+
+void ASPlayerState::SavePlayerState_Implementation(USSaveGame* SaveObject) {
+  if (SaveObject) {
+    SaveObject->Credits = Credits;
+  }
+}
+
+void ASPlayerState::LoadPlayerState_Implementation(USSaveGame* SaveObject) {
+  if (SaveObject) {
+    AddCredits(SaveObject->Credits);
+  }
 }
 
 void ASPlayerState::BeginPlay() {
