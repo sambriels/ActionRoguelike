@@ -5,6 +5,16 @@
 #include "Components/ActorComponent.h"
 #include "SActionComponent.generated.h"
 
+class USActionComponent;
+class USAction;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+  FOnActionStateChanged,
+  USActionComponent*,
+  OwningComp,
+  USAction*,
+  Action
+);
 
 class USAction;
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -32,6 +42,12 @@ public:
   UFUNCTION(BlueprintCallable, Category="Actions")
   bool StopActionByName(AActor* Instigator, FName ActionName);
 
+  UPROPERTY(BlueprintAssignable)
+  FOnActionStateChanged OnActionStarted;
+
+  UPROPERTY(BlueprintAssignable)
+  FOnActionStateChanged OnActionStopped;
+
   virtual void TickComponent(
     float DeltaTime,
     ELevelTick TickType,
@@ -51,7 +67,7 @@ protected:
   UFUNCTION(Server, Reliable)
   void ServerStopAction(AActor* Instigator, FName ActionName);
 
-  UPROPERTY(Replicated)
+  UPROPERTY(Replicated, BlueprintReadOnly)
   TArray<USAction*> Actions;
 
   UPROPERTY(EditAnywhere, Category="Actions")

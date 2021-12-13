@@ -49,6 +49,9 @@ public:
   virtual bool IsSupportedForNetworking() const override { return true; }
 
 protected:
+  UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="UI")
+  UTexture2D* Icon;
+
   /* Tag added to owning actor when activated, removed when actions stops */
   UPROPERTY(EditDefaultsOnly, Category="Tags")
   FGameplayTagContainer GrantsTags;
@@ -62,6 +65,9 @@ protected:
 
   UPROPERTY(ReplicatedUsing="OnRep_RepData")
   FActionRepData RepData;
+
+  UPROPERTY(Replicated)
+  float TimeStarted;
 
   UFUNCTION()
   void OnRep_RepData();

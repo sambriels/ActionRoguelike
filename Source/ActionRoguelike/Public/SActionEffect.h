@@ -10,7 +10,10 @@ class ACTIONROGUELIKE_API USActionEffect : public USAction {
 
 public:
   USActionEffect();
-  
+
+  UFUNCTION(BlueprintCallable, Category="Action")
+  float GetTimeRemaining() const;
+
   virtual void StartAction_Implementation(AActor* Instigator) override;
   virtual void StopAction_Implementation(AActor* Instigator) override;
 
