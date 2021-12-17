@@ -50,7 +50,7 @@ public:
 
 protected:
   UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="UI")
-  UTexture2D* Icon;
+  TSoftObjectPtr<UTexture2D> Icon;
 
   /* Tag added to owning actor when activated, removed when actions stops */
   UPROPERTY(EditDefaultsOnly, Category="Tags")
