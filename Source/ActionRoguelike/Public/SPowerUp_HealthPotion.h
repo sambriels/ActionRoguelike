@@ -16,6 +16,8 @@ class ACTIONROGUELIKE_API ASPowerUp_HealthPotion : public ASPowerUpBase {
 public:
   ASPowerUp_HealthPotion();
 
+  virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+  virtual FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
 protected:
   UPROPERTY(EditAnywhere, Category="HealthPotion")
   float HealthAmount;
@@ -23,5 +25,4 @@ protected:
   UPROPERTY(EditDefaultsOnly, Category="HealthPotion")
   int32 CreditsCost;
 
-  virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 };

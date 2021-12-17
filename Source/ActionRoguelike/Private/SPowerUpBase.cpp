@@ -21,6 +21,10 @@ void ASPowerUpBase::Interact_Implementation(APawn* InstigatorPawn) {
   ISGameplayInterface::Interact_Implementation(InstigatorPawn);
 }
 
+FText ASPowerUpBase::GetInteractText_Implementation(APawn* InstigatorPawn) {
+  return FText::GetEmpty();
+}
+
 void ASPowerUpBase::OnRep_IsActive() {
   RootComponent->SetVisibility(bIsActive, true);
   SetActorEnableCollision(bIsActive);

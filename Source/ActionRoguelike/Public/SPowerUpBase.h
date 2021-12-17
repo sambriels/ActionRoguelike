@@ -13,6 +13,9 @@ class ACTIONROGUELIKE_API ASPowerUpBase : public AActor, public ISGameplayInterf
 public:
   ASPowerUpBase();
 
+  virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+
+  virtual FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
 protected:
   UPROPERTY(EditAnywhere, Category="Components")
   USphereComponent* SphereComp;
@@ -25,8 +28,6 @@ protected:
 
   UPROPERTY(EditDefaultsOnly, ReplicatedUsing="OnRep_IsActive")
   bool bIsActive;
-
-  virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 
   UFUNCTION()
   void OnRep_IsActive();
