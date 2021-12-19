@@ -30,7 +30,7 @@ ASProjectileBase::ASProjectileBase() {
 
   ImpactSound = CreateDefaultSubobject<USoundBase>(TEXT("ImpactSound"));
 
-  SetReplicates(true);
+  bReplicates = true;
 }
 
 void ASProjectileBase::OnActorHit(
@@ -51,9 +51,19 @@ void ASProjectileBase::Explode_Implementation() {
   // Adding ensure to see if this triggers at all
   if (ensure(!IsPendingKill())) {
     if (ImpactSound) {
-      UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), GetActorRotation());
+      UGameplayStatics::PlaySoundAtLocation(
+        this,
+        ImpactSound,
+        GetActorLocation(),
+        GetActorRotation()
+      );
     }
-    UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVfx, GetActorLocation(), GetActorRotation());
+    UGameplayStatics::SpawnEmitterAtLocation(
+      this,
+      ImpactVfx,
+      GetActorLocation(),
+      GetActorRotation()
+    );
     // TODO: This does not work, cannot figure out why
     UGameplayStatics::PlayWorldCameraShake(
       this,

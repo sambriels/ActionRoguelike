@@ -62,51 +62,53 @@ float USAttributeComponent::GetMaxHealth() const {
   return MaxHealth;
 }
 
-bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Amount) {
-  if (!GetOwner()->CanBeDamaged() && Amount < 0.f) {
+bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta) {
+  if (!GetOwner()->CanBeDamaged() && Delta < 0.0f) {
     return false;
   }
 
+  if (Delta < 0.0f) {
+    float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
+
+    Delta *= DamageMultiplier;
+  }
+
   const float OldHealth = Health;
-  float NewHealth = FMath::Clamp<float>(OldHealth + Amount, 0, MaxHealth);
-  const float Delta = NewHealth - OldHealth;
+  const float NewHealth = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
 
-  // Is Server? Only then apply actual Health change
+  const float ActualDelta = NewHealth - OldHealth;
+
+  // Is Server?
   if (GetOwner()->HasAuthority()) {
-
-    if (Amount < 0.f) {
-      float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
-      Amount *= DamageMultiplier;
-
-      ApplyRageChange(InstigatorActor, FMath::Abs(Amount) * RageMultiplier);
-    }
-
     Health = NewHealth;
 
-    if (Delta != 0.f) {
-      MulticastHealthChanged(InstigatorActor, Health, Delta);
+    if (ActualDelta != 0.0f) {
+      MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
     }
 
     // Died
-    if (Delta <= 0.f && Health == 0.0f) {
+    if (ActualDelta < 0.0f && Health == 0.0f) {
       ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
-
       if (GM) {
         GM->OnActorKilled(GetOwner(), InstigatorActor);
       }
     }
   }
 
-  return Delta != 0;
+  return ActualDelta != 0;
 }
 
-void USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Amount) {
+bool USAttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta) {
   const float OldRage = Rage;
-  const float RoundedValue = FMath::Floor(OldRage + Amount);
-  Rage = FMath::Clamp<float>(RoundedValue, 0, MaxRage);
 
-  const float Delta = Rage + OldRage;
-  MulticastRageChanged(InstigatorActor, Rage, Delta);
+  Rage = FMath::Clamp(Rage + Delta, 0.0f, MaxRage);
+
+  const float ActualDelta = Rage - OldRage;
+  if (ActualDelta != 0.0f) {
+    OnRageChanged.Broadcast(InstigatorActor, this, Rage, ActualDelta);
+  }
+
+  return ActualDelta != 0;
 }
 
 void USAttributeComponent::MulticastHealthChanged_Implementation(

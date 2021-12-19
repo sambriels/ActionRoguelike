@@ -18,7 +18,7 @@
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(
   TEXT("su.SpawnBots"),
-  false,
+  true,
   TEXT("Enable spawning of bots via timer."),
   ECVF_Cheat
 );

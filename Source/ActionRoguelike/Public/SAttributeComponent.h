@@ -93,8 +93,8 @@ public:
   FOnRageChanged OnRageChanged;
 
   UFUNCTION(BlueprintCallable, Category="Attributes")
-  bool ApplyHealthChange(AActor* InstigatorActor, float Amount);
+  bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
 
   UFUNCTION(BlueprintCallable, Category="Attributes")
-  void ApplyRageChange(AActor* InstigatorActor, float Amount);
+  bool ApplyRageChange(AActor* InstigatorActor, float Delta);
 };
