@@ -16,12 +16,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
-static TAutoConsoleVariable<bool> CVarSpawnBots(
-  TEXT("su.SpawnBots"),
-  true,
-  TEXT("Enable spawning of bots via timer."),
-  ECVF_Cheat
-);
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ASGameModeBase::ASGameModeBase() {
   SpawnTimerInterval = 2.f;
@@ -39,13 +34,7 @@ void ASGameModeBase::StartPlay() {
   Super::StartPlay();
 
   // Continuous timer to spawn bots, can be limited in SpawnBotTimerElapsed
-  GetWorldTimerManager().SetTimer(
-    TimerHandle_SpawnBots,
-    this,
-    &ASGameModeBase::SpawnBotTimerElapsed,
-    SpawnTimerInterval,
-    true
-  );
+  GetWorldTimerManager().SetTimer(TimerHandle_SpawnBots, this, &ASGameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 
   if (ensure(PowerUpClasses.Num() > 0)) {
     UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(
@@ -56,10 +45,7 @@ void ASGameModeBase::StartPlay() {
       nullptr
     );
     if (ensure(QueryInstance)) {
-      QueryInstance->GetOnQueryFinishedEvent().AddDynamic(
-        this,
-        &ASGameModeBase::OnPowerUpSpawnQueryCompleted
-      );
+      QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnPowerUpSpawnQueryCompleted);
     }
   }
 
@@ -74,12 +60,14 @@ void ASGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* N
   Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
-void ASGameModeBase::InitGame(
-  const FString& MapName,
-  const FString& Options,
-  FString& ErrorMessage
-) {
+void ASGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) {
   Super::InitGame(MapName, Options, ErrorMessage);
+
+  FString SelectedSaveSlot = UGameplayStatics::ParseOption(Options, "SaveGame");
+
+  if (SelectedSaveSlot.Len() > 0) {
+    SlotName = SelectedSaveSlot;
+  }
 
   LoadSaveGame();
 }
@@ -104,13 +92,7 @@ void ASGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer) {
     }
   }
 
-  UE_LOG(
-    LogTemp,
-    Log,
-    TEXT("OnActorKilled: Victim: %s, Killer: %s"),
-    *GetNameSafe(VictimActor),
-    *GetNameSafe(Killer)
-  );
+  UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim: %s, Killer: %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
 }
 
 void ASGameModeBase::KillAll() {
@@ -185,7 +167,7 @@ void ASGameModeBase::LoadSaveGame() {
         if (ActorData.ActorName == Actor->GetName()) {
           Actor->SetActorTransform(ActorData.Transform);
 
-          // Read binary array of Saved UPROPRTIES
+          // Read binary array of Saved UPROPERTIES
           FMemoryReader MemReader(ActorData.BytesData);
 
           FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
@@ -199,9 +181,7 @@ void ASGameModeBase::LoadSaveGame() {
       }
     }
   } else {
-    CurrentSaveGame = Cast<USSaveGame>(
-      UGameplayStatics::CreateSaveGameObject(USSaveGame::StaticClass())
-    );
+    CurrentSaveGame = Cast<USSaveGame>(UGameplayStatics::CreateSaveGameObject(USSaveGame::StaticClass()));
     UE_LOG(LogTemp, Warning, TEXT("Created new save game data"));
   }
 
@@ -250,17 +230,11 @@ void ASGameModeBase::SpawnBotTimerElapsed() {
     nullptr
   );
   if (ensure(QueryInstance)) {
-    QueryInstance->GetOnQueryFinishedEvent().AddDynamic(
-      this,
-      &ASGameModeBase::OnBotSpawnQueryCompleted
-    );
+    QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnBotSpawnQueryCompleted);
   }
 }
 
-void ASGameModeBase::OnBotSpawnQueryCompleted(
-  UEnvQueryInstanceBlueprintWrapper* QueryInstance,
-  EEnvQueryStatus::Type QueryStatus
-) {
+void ASGameModeBase::OnBotSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus) {
   if (QueryStatus != EEnvQueryStatus::Success) {
     UE_LOG(LogTemp, Warning, TEXT("SpawnBotEQSQuery Failed"));
     return;
@@ -303,25 +277,12 @@ void ASGameModeBase::OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLoca
   if (Manager) {
     USMonsterData* MonsterData = Cast<USMonsterData>(Manager->GetPrimaryAssetObject(LoadedId));
     if (MonsterData) {
-      AActor* NewBot = GetWorld()->SpawnActor<AActor>(
-        MonsterData->MonsterClass,
-        SpawnLocation,
-        FRotator::ZeroRotator
-      );
+      AActor* NewBot = GetWorld()->SpawnActor<AActor>(MonsterData->MonsterClass, SpawnLocation, FRotator::ZeroRotator);
       if (NewBot) {
-        LogOnScreen(
-          this,
-          FString::Printf(
-            TEXT("Spawned enemy: %s (%s)"),
-            *GetNameSafe(NewBot),
-            *GetNameSafe(MonsterData->MonsterClass)
-          )
-        );
+        LogOnScreen(this, FString::Printf(TEXT("Spawned enemy: %s (%s)"), *GetNameSafe(NewBot), *GetNameSafe(MonsterData->MonsterClass)));
 
         // Grant special actions, buffs etc.
-        USActionComponent* ActionComp = Cast<USActionComponent>(
-          NewBot->GetComponentByClass(USActionComponent::StaticClass())
-        );
+        USActionComponent* ActionComp = Cast<USActionComponent>(NewBot->GetComponentByClass(USActionComponent::StaticClass()));
         if (ActionComp) {
           for (const TSubclassOf<USAction> ActionClass : MonsterData->Actions) {
             ActionComp->AddAction(NewBot, ActionClass);
@@ -333,10 +294,7 @@ void ASGameModeBase::OnMonsterLoaded(FPrimaryAssetId LoadedId, FVector SpawnLoca
 
 }
 
-void ASGameModeBase::OnPowerUpSpawnQueryCompleted(
-  UEnvQueryInstanceBlueprintWrapper* QueryInstance,
-  EEnvQueryStatus::Type QueryStatus
-) {
+void ASGameModeBase::OnPowerUpSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus) {
   if (QueryStatus != EEnvQueryStatus::Success) {
     UE_LOG(LogTemp, Warning, TEXT("Spawn PowerUp Query Failed"));
     return;

@@ -25,8 +25,10 @@ ASAICharacter::ASAICharacter() {
   HitFlashTimeParamName = "HitFlashTime";
   HitFlashColorParamName = "HitFlashColor";
 
-  GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
-  GetMesh()->SetGenerateOverlapEvents(true);
+  // No longer needed since we have a specifc projectile profile that does this automatically
+  // GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+  // GetMesh()->SetGenerateOverlapEvents(true);
+
 }
 
 void ASAICharacter::PostInitializeComponents() {
